@@ -15,15 +15,15 @@ module.exports = {
     '$inc': {
         fn: function (key, val, entry) {
             let _val = parseInt(val, 10);
-            Helpers.is(entry.value, '!object') ? this.set(entry._id, (entry.value = (parseInt(entry.value, 10) + _val))) : Helpers.dotNotation(key, entry.value, (current, next) => {
-                return (current !== Helpers._null ? current = (parseInt(current, 10) + _val) : _val);
+            Helpers.is(entry.value, '!object') ? this.set(entry._id, (entry.value = (parseInt(entry.value, 10) + _val))) : Helpers.dotNotation(key, entry.value, (current) => {
+                return (current !== Helpers._null ? parseInt(current, 10) + _val : _val);
             });
         }
     },
     '$mul': {
         fn: function (key, val, entry) {
             let _val = parseInt(val, 10);
-            Helpers.is(entry.value, '!object') ? this.set(entry._id, (entry.value = parseInt(entry.value, 10) * _val)) : Helpers.dotNotation(key, entry.value, (current, next) => {
+            Helpers.is(entry.value, '!object') ? this.set(entry._id, (entry.value = parseInt(entry.value, 10) * _val)) : Helpers.dotNotation(key, entry.value, (current) => {
                 return (current !== Helpers._null ? parseInt(current, 10) * _val : _val);
             });
         }
