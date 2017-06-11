@@ -4,10 +4,5 @@
  */
 'use strict';
 module.exports = {
-    '$or': {
-        fn: [].some
-    },
-    '$and': {
-        fn: [].every
-    }
+     // TODO: https://docs.mongodb.com/manual/reference/operator/update/#array
 };

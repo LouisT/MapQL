@@ -12,7 +12,7 @@ module.exports = ((list) => {
          }
     };
     list.forEach((name) => {
-        Object.assign(operators, require(`./selectors/${name}`));
+        Object.assign(operators, require(`./modifiers/${name}`));
     });
     return operators;
-})(['Comparison', 'Element', 'Evaluation', 'Array']);
+})(['Array', 'Update']);
