@@ -1,6 +1,6 @@
 MapQL (WIP)
 ===
-A __[MongoDB]__ inspired __[ES6 Map()]__ QL. - [![Build Status](https://travis-ci.org/LouisT/MapQL.svg?branch=master)](https://travis-ci.org/LouisT/MapQL)
+A __[MongoDB]__ inspired __[ES6 Map()]__ QL. - [![Build Status](https://travis-ci.org/LouisT/MapQL.svg?branch=dev)](https://travis-ci.org/LouisT/MapQL)
 
 This is a ___WIP___; do __NOT__ use in production yet! See [TODO](TODO.md) for more information.
 
