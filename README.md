@@ -17,6 +17,13 @@ Implemented [Query Operators]
 * Array
   * $size
 
+
+Implemented [Update Operators]
+===
+* Fields
+  * $set, $inc, $mul
+* Array
+
 ### Example: `MapQL.find()`
 ```javascript
 const MapQL = new (require('mapql'))(),
@@ -159,3 +166,4 @@ console.log('entries:\n%s', util.inspect([...MapQL.entries()], { depth: null }))
 [MongoDB]: https://www.mongodb.com/
 [ES6 Map()]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map
 [Query Operators]: https://docs.mongodb.com/manual/reference/operator/query/
+[Update Operators]: https://docs.mongodb.com/manual/reference/operator/update/

@@ -15,4 +15,4 @@ module.exports = ((list) => {
         Object.assign(operators, require(`./modifiers/${name}`));
     });
     return operators;
-})(['Array', 'Update']);
+})(['Array', 'Field']);
