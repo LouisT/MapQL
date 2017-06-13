@@ -9,7 +9,9 @@ const isEqual = require('is-equal'),
 module.exports = {
     '$set': {
         fn: function (key, val, entry) {
-            Helpers.is(entry.value, '!object') ? this.set(entry._id, (entry.value = val)) : Helpers.dotNotation(key, entry.value, val);
+            Helpers.is(entry.value, '!object') ? this.set(entry._id, (entry.value = val)) : Helpers.dotNotation(key, entry.value, () => {
+                return val;
+            });
         }
     },
     '$inc': {
