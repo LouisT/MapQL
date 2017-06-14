@@ -14,15 +14,15 @@ module.exports = {
         },
         fn: function (val, bool, keys = Helpers._null, entry) {
             try {
-               return bool === (Helpers.dotNotation(keys, entry[1]) !== undefined);
+               return bool === (Helpers.dotNotation(keys, entry[1], { defined: true }) !== undefined);
              } catch (error) {
                return keys === Helpers._null ? (bool === undefined ? true : bool) : false;
             }
         }
     },
     '$type': {
-        fn: function (val, type) {
-            return Helpers.is(val, type);
+        fn: function (val, type, keys = Helpers._null, entry) {
+            return Helpers.is(Helpers.dotNotation(keys, entry[1], { defined: true }), type);
         }
     }
 };
