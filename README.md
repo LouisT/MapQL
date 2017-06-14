@@ -21,7 +21,7 @@ Implemented [Query Operators]
 Implemented [Update Operators]
 ===
 * Fields
-  * $set, $inc, $mul
+  * $set, $inc, $mul, $unset
 * Array
 
 ### Example: `MapQL.find()`
