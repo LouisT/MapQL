@@ -3,6 +3,23 @@
  * Licensed under the MIT license https://raw.githubusercontent.com/LouisT/MapQL/master/LICENSE
  */
 'use strict';
+let Helpers = require('../../lib/Helpers');
+
 module.exports = {
-     // TODO: https://docs.mongodb.com/manual/reference/operator/update/#array
+     '$pop': {
+         fn: function (key, val, entry) {
+             if (Helpers.is(entry.value, 'object')) {
+                Helpers.dotNotation(key, entry.value, {
+                    value: (current) => {
+                        if (Array.isArray(current)) {
+                           current[(val == -1 ? 'pop' : 'shift')]();
+                        }
+                        return (current !== Helpers._null ? current : []);
+                    }
+                });
+              } else if (Helpers.is(entry.value, 'array')) {
+                entry.value[(val == -1 ? 'pop' : 'shift')]();
+             }
+         }
+     }
 };

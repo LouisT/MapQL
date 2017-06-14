@@ -23,6 +23,7 @@ Implemented [Update Operators]
 * Fields
   * $set, $inc, $mul, $unset
 * Array
+  * $pop
 
 ### Example: `MapQL.find()`
 ```javascript
