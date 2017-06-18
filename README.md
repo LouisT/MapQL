@@ -1,8 +1,19 @@
 MapQL (WIP)
 ===
-A __[MongoDB]__ inspired __[ES6 Map()]__ QL. - [![Build Status](https://travis-ci.org/LouisT/MapQL.svg?branch=dev)](https://travis-ci.org/LouisT/MapQL)
+A __[MongoDB]__ inspired __[ES6 Map()]__ query language. - [![Build Status](https://travis-ci.org/LouisT/MapQL.svg?branch=dev)](https://travis-ci.org/LouisT/MapQL)
 
 This is a ___WIP___; do __NOT__ use in production yet! See [TODO](TODO.md) for more information.
+
+Browser Support
+===
+Currently only supports browsers with [ES6 Map()], [Classes] and [Arrow] features/functions.
+```html
+<!-- MapQL() WITHOUT chain() support -->
+<script src="./dist/MapQL.es6.js"></script>
+<!-- MapQL() WITH chain() support -->
+<script src="./dist/MapQL.es6.chainable.js"></script>
+```
+You can use [unpkg] to retrieve dist files.
 
 Implemented [Query Operators]
 ===
@@ -16,7 +27,6 @@ Implemented [Query Operators]
   * $regex, $where
 * Array
   * $size
-
 
 Implemented [Update Operators]
 ===
@@ -105,7 +115,7 @@ MapQL.findAsync({ foo: { '$gt': 2 }, bar: { '$lt': 10 } }).then((results) => {
 ```javascript
 const MapQL = new (require('mapql/chainable'))(),
       util = require('util');
-
+7
 // Add some base data.
 MapQL.set('testing0', {
    foo: 4,
@@ -166,5 +176,9 @@ console.log('entries:\n%s', util.inspect([...MapQL.entries()], { depth: null }))
 
 [MongoDB]: https://www.mongodb.com/
 [ES6 Map()]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map
+[Classes]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes
+[Arrow]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions
 [Query Operators]: https://docs.mongodb.com/manual/reference/operator/query/
 [Update Operators]: https://docs.mongodb.com/manual/reference/operator/update/
+[unpkg]: https://unpkg.com/mapql/
+

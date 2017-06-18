@@ -16,9 +16,16 @@ TODO
 * Improve the ID generator; need to have a more (unique) uniform ID.
 * Try to work out how to improve `$where` as if the entry is not an object it gets passed as an argument.
     * Example: MapQL.find({ '$where': function (arg) { return (this.foo || arg) == 1 } });
-* Add `MapQL.update()` which require [Update Operators].
+* Improve `MapQL.update(<Query>, <Update Operators>)` which require [Update Operators].
+  * Improve the `Field` update modifiers.
+* Implement babel with grunt; add polyfills to work with ES5 browsers.
+  * Add checks to make sure the lib is supported in the user browser.
+  * Improve browserify usage.
+* Add browser tests.
+* Document import/export feature.
 * Everything else.
   * Work on the TODO!
+
 
 [MongoDB Query and Projection Operators]: https://docs.mongodb.com/manual/reference/operator/query/
 [Projection Operators]: https://docs.mongodb.com/manual/reference/operator/query/#projection-operators

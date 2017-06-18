@@ -1,11 +1,11 @@
 /*!
- * A MongoDB inspired ES6 Map() QL. - Copyright (c) 2017 Louis T. (https://lou.ist/)
+ * A MongoDB inspired ES6 Map() query language. - Copyright (c) 2017 Louis T. (https://lou.ist/)
  * Licensed under the MIT license https://raw.githubusercontent.com/LouisT/MapQL/master/LICENSE
  */
 'use strict';
-const queryOperators = require('../operators/Query'),
-      logicalOperators = require('../operators/Logical'),
-      updateOperators = require('../operators/Update'),
+const queryOperators = require('./operators/Query'),
+      logicalOperators = require('./operators/Logical'),
+      updateOperators = require('./operators/Update'),
       Document = require('./Document'),
       Cursor = require('./Cursor'),
       Helpers = require('./Helpers'),
@@ -227,6 +227,56 @@ class MapQL extends Map {
              }
           }
           return cursor;
+      }
+
+      /*
+       * Export current Document's to JSON key/value.
+       *
+       * Note: Any 'null' key gets converted to a string. Since null is a valid key,
+       *       import() automatically converts every "null" string into null.
+       */
+      export (options = {}) {
+          let opts = Object.assign({
+              stringify: true,
+              promise: false,
+              pretty: false,
+          }, options);
+          try {
+              let obj = Object.create(null);
+              for (let [key, val] of this) {
+                  obj[key] = val;
+              }
+              return ((res) => {
+                  return (opts.promise ? Promise.resolve(res) : res);
+              })(opts.stringify ? JSON.stringify(obj, true, (opts.pretty ? 4 : 0)) : obj);
+           } catch (error) {
+             return (promise ? Promise.reject(error) : error);
+          }
+      }
+
+      /*
+       * Import JSON key/value objects as entries; usually from export().
+       *
+       * Note: If a string is passed, attempt to parse with JSON.parse(),
+       *       otherwise assume to be a valid Object.
+       */
+      import (json, options = {}) {
+          let opts = Object.assign({
+              promise: false
+          }, options);
+          try {
+              let obj = (Helpers.is(json, 'string') ? JSON.parse(json) : json);
+              for (let key of Object.keys(obj)) {
+                  this.set((key === "null" ? null : key), obj[key]);
+              }
+           } catch (error) {
+              if (opts.promise) {
+                 return Promise.reject(error);
+               } else {
+                 throw error;
+              }
+          }
+          return (opts.promise ? Promise.resolve(this) : this);
       }
 }
 
