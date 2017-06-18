@@ -1,6 +1,6 @@
 /*!
- * A MongoDB inspired ES6 Map() QL. - Copyright (c) 2017 Louis T. (https://lou.ist/)
- * Licensed under MIT license https://raw.githubusercontent.com/LouisT/MapQL/master/LICENSE
+ * A MongoDB inspired ES6 Map() query language. - Copyright (c) 2017 Louis T. (https://lou.ist/)
+ * Licensed under the MIT license https://raw.githubusercontent.com/LouisT/MapQL/master/LICENSE
  */
 'use strict';
 const Helpers = require('./Helpers'),
@@ -28,6 +28,13 @@ class Cursor extends Array {
           return Array.prototype.push.apply(this, (Array.isArray(result) ? result : [result]).filter((res) => {
               return res.isDocument;
           })) >= 1 ? this : false;
+      }
+
+      /*
+       * Check if this is empty or not.
+       */
+      empty () {
+          return !(this.length >= 1);
       }
 
       /*

@@ -1,10 +1,11 @@
 /*!
- * A MongoDB inspired ES6 Map() QL. - Copyright (c) 2017 Louis T. (https://lou.ist/)
- * Licensed under MIT license https://raw.githubusercontent.com/LouisT/MapQL/master/LICENSE
+ * A MongoDB inspired ES6 Map() query language. - Copyright (c) 2017 Louis T. (https://lou.ist/)
+ * Licensed under the MIT license https://raw.githubusercontent.com/LouisT/MapQL/master/LICENSE
  */
 'use strict';
-const queryOperators = require('../operators/Query'),
-      logicalOperators = require('../operators/Logical'),
+const queryOperators = require('./operators/Query'),
+      logicalOperators = require('./operators/Logical'),
+      updateOperators = require('./operators/Update'),
       Document = require('./Document'),
       Cursor = require('./Cursor'),
       Helpers = require('./Helpers'),
@@ -27,16 +28,16 @@ class MapQL extends Map {
       }
 
       /*
-       * Convert the query object to an Object with an Array of queries.
+       * Convert the query/update object to an Object with an Array
+       * of queries or update modifiers.
        */
-      compileQueries (obj = {}) {
+      compile (obj = {}, update = false) {
           let results = {
               operator: false,
               list: []
           };
           for (let key of Object.keys(obj)) {
-              let isOP = this.isOperator(key),
-                  isLO = this.isLogical(key);
+              let isLO = this.isLogicalOperator(key);
               if (Helpers.is(obj[key], 'object')) {
                  for (let mode of Object.keys(obj[key])) {
                      results.list.push([key, mode, obj[key][mode]]);
@@ -45,12 +46,17 @@ class MapQL extends Map {
                } else if (isLO && Array.isArray(obj[key])) {
                  for (let subobj of obj[key]) {
                      // Recursively compile sub-queries for logical operators.
-                     results.list.push(this.compileQueries(subobj));
+                     results.list.push(this.compile(subobj));
                  }
                  // Store the logical operator for this query; used in _validate().
                  results.operator = key;
                } else {
-                 results.list.push([isOP ? Helpers._null : key, isOP ? key: '$eq', obj[key]]);
+                 let isUQ = (update ? this.isUpdateOperator(key) : this.isQueryOperator(key));
+                 results.list.push([
+                     update ? (isUQ ? key : '$set') : (isUQ ? Helpers._null : key),
+                     (isUQ || update) ? key : '$eq',
+                     obj[key]
+                 ]);
               }
           }
           return results;
@@ -64,7 +70,7 @@ class MapQL extends Map {
       }
 
       /*
-       *  Get the valid query and logical operators; with and without static to
+       *  Get the valid query, logical, and update operators; with and without static to
        *  avoid this.constructor.<name> calls within the MapQL library itself.
        */
       static get queryOperators () {
@@ -78,6 +84,12 @@ class MapQL extends Map {
       }
       get logicalOperators () {
           return logicalOperators;
+      }
+      static get updateOperators () {
+          return updateOperators;
+      }
+      get updateOperators () {
+          return updateOperators;
       }
 
       /*
@@ -109,13 +121,17 @@ class MapQL extends Map {
       }
 
       /*
-       * Check if a string is a query operator OR a logical operator.
+       * Check if a string is an update operator.
        */
-      isOperator (op) {
-         return this.isQueryOperator(op);
+      isUpdateOperator (uo = Helpers._null) {
+          return this.updateOperators.hasOwnProperty(uo) == true;
       }
-      isLogical (lo) {
-         return this.isLogicalOperator(lo);
+
+      /*
+       * Get the update operator by name.
+       */
+      getUpdateOperator (uo = '$_default') {
+          return this.updateOperators[uo] ? this.updateOperators[uo] : this.updateOperators['$_default'];
       }
 
       /*
@@ -127,15 +143,11 @@ class MapQL extends Map {
               if (this.isLogicalOperator(queries.operator)) {
                  return this._validate(entry, _query);
                } else {
-                 let value = undefined;
-                 try {
-                    value = Helpers.dotNotation(_query[0], entry[1]);
-                 } catch (error) { }
                  return this.getQueryOperator(_query[1]).fn.apply(this, [
-                     value,      // Entry value
-                     _query[2],  // Test value
-                     _query[0],  // Test key
-                     entry       // Entry [<Key>, <Value>]
+                     Helpers.dotNotation(_query[0], entry[1], { autoCreate: false }), // Entry value
+                     _query[2], // Test value
+                     _query[0], // Test key
+                     entry      // Entry [<Key>, <Value>]
                  ]);
               }
           });
@@ -151,7 +163,7 @@ class MapQL extends Map {
              }
              queries = { '$eq' : queries };
           }
-          let _queries = this.compileQueries(queries);
+          let _queries = this.compile(queries);
           if (!!_queries.list.length) {
              let cursor = new Cursor(queries, bykey);
              for (let entry of this.entries()) {
@@ -194,6 +206,77 @@ class MapQL extends Map {
                   reject(error);
               }
           });
+      }
+
+      /*
+       * Update entries using update modifiers if they match
+       * the provided query operators. Returns the query Cursor,
+       * after updates are applied to the Documents.
+       */
+      update (query, modifiers, options = {}) {
+          let opts = Object.assign({ multi: false }, options),
+              cursor = this[opts.multi ? 'find' : 'findOne'](query);
+          if (!cursor.empty()) {
+             let update = this.compile(modifiers, true);
+             if (!!update.list.length) {
+                for (let entry of cursor) {
+                    update.list.forEach((_update) => {
+                        this.getUpdateOperator(_update[0]).fn.apply(this, [_update[1], _update[2], entry, this]);
+                    });
+                }
+             }
+          }
+          return cursor;
+      }
+
+      /*
+       * Export current Document's to JSON key/value.
+       *
+       * Note: Any 'null' key gets converted to a string. Since null is a valid key,
+       *       import() automatically converts every "null" string into null.
+       */
+      export (options = {}) {
+          let opts = Object.assign({
+              stringify: true,
+              promise: false,
+              pretty: false,
+          }, options);
+          try {
+              let obj = Object.create(null);
+              for (let [key, val] of this) {
+                  obj[key] = val;
+              }
+              return ((res) => {
+                  return (opts.promise ? Promise.resolve(res) : res);
+              })(opts.stringify ? JSON.stringify(obj, true, (opts.pretty ? 4 : 0)) : obj);
+           } catch (error) {
+             return (promise ? Promise.reject(error) : error);
+          }
+      }
+
+      /*
+       * Import JSON key/value objects as entries; usually from export().
+       *
+       * Note: If a string is passed, attempt to parse with JSON.parse(),
+       *       otherwise assume to be a valid Object.
+       */
+      import (json, options = {}) {
+          let opts = Object.assign({
+              promise: false
+          }, options);
+          try {
+              let obj = (Helpers.is(json, 'string') ? JSON.parse(json) : json);
+              for (let key of Object.keys(obj)) {
+                  this.set((key === "null" ? null : key), obj[key]);
+              }
+           } catch (error) {
+              if (opts.promise) {
+                 return Promise.reject(error);
+               } else {
+                 throw error;
+              }
+          }
+          return (opts.promise ? Promise.resolve(this) : this);
       }
 }
 

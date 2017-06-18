@@ -1,10 +1,10 @@
 /*!
- * A MongoDB inspired ES6 Map() QL. - Copyright (c) 2017 Louis T. (https://lou.ist/)
- * Licensed under MIT license https://raw.githubusercontent.com/LouisT/MapQL/master/LICENSE
+ * A MongoDB inspired ES6 Map() query language. - Copyright (c) 2017 Louis T. (https://lou.ist/)
+ * Licensed under the MIT license https://raw.githubusercontent.com/LouisT/MapQL/master/LICENSE
  */
 'use strict';
 const isEqual = require('is-equal'),
-      Helpers = require('../lib/Helpers');
+      Helpers = require('../../Helpers');
 
 /*
  * Validate $in/$nin with support for RegExp, fallback
@@ -33,42 +33,42 @@ class inOrNin {
 
 module.exports = {
     '$eq': {
-        fn: (val = true, eq = false) => {
+        fn: function (val = true, eq = false) {
             return isEqual(val, eq);
         }
     },
     '$gt': {
-        fn: (val, lt) => {
+        fn: function (val, lt) {
             return val > lt;
         }
     },
     '$gte': {
-        fn: (val, lte) => {
+        fn: function (val, lte) {
             return val >= lte;
         }
     },
     '$lt': {
-        fn: (val, gt) => {
+        fn: function (val, gt) {
             return val < gt;
         }
     },
     '$lte': {
-        fn: (val, gte) => {
+        fn: function (val, gte) {
             return val <= gte;
         }
     },
     '$ne': {
-        fn: (val, ne) => {
+        fn: function (val, ne) {
             return val !== ne;
         }
     },
     '$in': {
-        fn: (val, _in) => {
+        fn: function (val, _in) {
             return new inOrNin().validate(val, _in);
         }
     },
     '$nin': {
-        fn: (val, nin) => {
+        fn: function (val, nin) {
             return !(new inOrNin().validate(val, nin));
         }
     }
