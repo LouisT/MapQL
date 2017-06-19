@@ -1,6 +1,6 @@
 {
   "name": "mapql",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A MongoDB inspired ES6 Map() query langauge.",
   "main": "index.js",
   "scripts": {
@@ -40,9 +40,7 @@
     "mocha": "^3.4.2"
   },
   "dependencies": {
-    "duplexer": "^0.1.1",
-    "is-equal": "^1.5.5",
-    "through": "^2.3.8"
+    "is-equal": "^1.5.5"
   },
   "engines": {
     "node": ">=6.0.0"
