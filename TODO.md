@@ -18,6 +18,7 @@ TODO
     * Example: MapQL.find({ '$where': function (arg) { return (this.foo || arg) == 1 } });
 * Improve `MapQL.update(<Query>, <Update Operators>)` which require [Update Operators].
   * Improve the `Field` update modifiers.
+* Add `MapQL.remove(<Query>[, <multi>])` to remove entries via query.
 * Implement babel with grunt; add polyfills to work with ES5 browsers.
   * Add checks to make sure the lib is supported in the user browser.
   * Improve browserify usage.
