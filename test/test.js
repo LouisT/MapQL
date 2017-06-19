@@ -116,7 +116,7 @@ describe('Get', () => {
         it('it should find test3 with: { \'$regex\': /^Str/i }', () => {
             assert.equal(MapQL.find({ '$regex': /^Str/i })[0]._id, 'test3');
         });
-        it('it should find test4 with: { bar: { \'$type\': \'number\' } }', () => {
+        it('it should find test4 with: { qux: { \'$type\': \'number\' } }', () => {
             assert.equal(MapQL.find({ qux: { '$type': 'number' } })[0]._id, 'test4');
         });
         it('it should find test5 with: { \'$or\': [{ foo: { \'$eq\': 14 } }, { bar: { \'$eq\': null } ] }', () => {
@@ -194,11 +194,10 @@ describe('Modify', () => {
             assert.deepEqual($update[0].value, 400);
             assert.deepEqual($update[0]._id, 'test0');
         });
-        it('it should remove "test0" for update(\'test0\', { \'$unset\': true })', () => {
-            let $update = MapQL.update('test0', { '$unset': true });
-            assert.deepEqual($update[0].value, undefined);
-            assert.deepEqual($update[0]._id, 'test0');
-            assert.deepEqual(MapQL.findByKey('test0').empty(), true);
+        it('it should remove "foobar" from "test1" for update(\'test1\', { \'$unset\': { foobar: 1 } })', () => {
+            let $update = MapQL.update('test1', { '$unset': { foobar: 1 } });
+            assert.deepEqual($update[0].value.foobar, undefined);
+            assert.deepEqual($update[0]._id, 'test1');
         });
         it('it should remove "A" from "test7" array for update(\'test7\', { \'$pop\': { \'array\': 1 } })', () => {
             let $update = MapQL.update('test7', { '$pop': { 'array': 1 } });
@@ -214,8 +213,22 @@ describe('Modify', () => {
 });
 describe('Delete', () => {
     describe('#delete()', () => {
-        it('it should remove test1', () => {
-            assert.equal(MapQL.delete('test1'), true);
+        it('it should remove test0', () => {
+            assert.equal(MapQL.delete('test0'), true);
+        });
+    });
+    describe('#remove()', () => {
+        it('it should remove test1 for remove({ foo: \'bar\' })', () => {
+            assert.equal(MapQL.remove({ foo: 'bar' })[0], 'test1');
+        });
+        it('it should remove test2 for remove({ bar: { \'$lt\': 10 }, baz: { \'$gt\': 3 } })', () => {
+            assert.equal(MapQL.remove({ bar: { '$lt': 10 }, baz: { '$gt': 3 } })[0], 'test2');
+        });
+        it('it should remove test3 for remove({ \'$regex\': /^Str/i })', () => {
+            assert.equal(MapQL.remove({ '$regex': /^Str/i })[0], 'test3');
+        });
+        it('it should remove test4 for remove({ qux: { \'$type\': \'number\' } })', () => {
+            assert.equal(MapQL.remove({ qux: { '$type': 'number' } })[0], 'test4');
         });
     });
     describe('#clear()', () => {

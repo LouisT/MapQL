@@ -17,6 +17,8 @@ You can use [unpkg] to retrieve dist files.
 
 Implemented [Query Operators]
 ===
+Used with `{Instance}.find(<Query>)` and `{Instance}.remove(<Query>[, <Multi (Boolean)>])`.
+
 * Comparison
   * $eq, $gt, $gte, $lt, $lte, $ne, $in, $nin
 * Logical
@@ -30,10 +32,14 @@ Implemented [Query Operators]
 
 Implemented [Update Operators]
 ===
+Used with `{Instance}.update(<Query>, <Update>)`.
+
 * Fields
   * $set, $inc, $mul, $unset
 * Array
   * $pop
+
+
 
 ### Example: `MapQL.find()`
 ```javascript

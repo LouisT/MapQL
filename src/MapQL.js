@@ -233,6 +233,39 @@ class MapQL extends Map {
       }
 
       /*
+       * Delete entries if they match the provided query operators.
+       * If queries is an Array or String of key(s), treat as array
+       * and remove each key. Returns an Array of deleted IDs. If
+       * `multi` is true remove all matches.
+       */
+      remove (queries, multi = false) {
+          let removed = [];
+          if (Helpers.is(queries, '!object')) {
+             for (let key of (Array.isArray(queries) ? queries : [queries])) {
+                 if (this.has(key) && this.delete(key)) {
+                    removed.push(key);
+                 }
+             }
+           } else {
+             let _queries = this.compile(queries);
+             if (!!_queries.list.length) {
+                for (let entry of this.entries()) {
+                    if (this._validate(entry, _queries)) {
+                       if (this.delete(entry[0])) {
+                          if (!multi) {
+                             return [entry[0]];
+                           } else {
+                             removed.push(entry[0]);
+                          }
+                       }
+                    }
+                }
+             }
+          }
+          return removed;
+      }
+
+      /*
        * Export current Document's to JSON key/value.
        *
        * Note: Any 'null' key gets converted to a string. Since null is a valid key,
