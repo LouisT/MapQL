@@ -31,20 +31,20 @@ class MapQL extends Map {
        * Convert the query/update object to an Object with an Array
        * of queries or update modifiers.
        */
-      compile (obj = {}, update = false) {
+      compile (queries = {}, update = false) {
           let results = {
               operator: false,
               list: []
           };
-          for (let key of Object.keys(obj)) {
+          for (let key of Object.keys(queries)) {
               let isLO = this.isLogicalOperator(key);
-              if (Helpers.is(obj[key], 'object')) {
-                 for (let mode of Object.keys(obj[key])) {
-                     results.list.push([key, mode, obj[key][mode]]);
+              if (Helpers.is(queries[key], 'object')) {
+                 for (let mode of Object.keys(queries[key])) {
+                     results.list.push([key, mode, queries[key][mode]]);
                  }
                // If the query is an array, treat it as a logical operator.
-               } else if (isLO && Array.isArray(obj[key])) {
-                 for (let subobj of obj[key]) {
+               } else if (isLO && Array.isArray(queries[key])) {
+                 for (let subobj of queries[key]) {
                      // Recursively compile sub-queries for logical operators.
                      results.list.push(this.compile(subobj));
                  }
@@ -55,7 +55,7 @@ class MapQL extends Map {
                  results.list.push([
                      update ? (isUQ ? key : '$set') : (isUQ ? Helpers._null : key),
                      (isUQ || update) ? key : '$eq',
-                     obj[key]
+                     queries[key]
                  ]);
               }
           }
@@ -213,9 +213,12 @@ class MapQL extends Map {
        * the provided query operators. Returns the query Cursor,
        * after updates are applied to the Documents.
        */
-      update (query, modifiers, options = {}) {
-          let opts = Object.assign({ multi: false }, options),
-              cursor = this[opts.multi ? 'find' : 'findOne'](query);
+      update (queries, modifiers, options = {}) {
+          let opts = Object.assign({
+                  multi: false,
+                  projections: {}
+              }, options),
+              cursor = this[Helpers.is(queries, 'string') ? 'findByKey' : 'find'](queries, opts.projections, !opts.multi);
           if (!cursor.empty()) {
              let update = this.compile(modifiers, true);
              if (!!update.list.length) {
