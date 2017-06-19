@@ -1,7 +1,7 @@
 /*!
- * MapQL v0.0.2 - A MongoDB inspired ES6 Map() query langauge. - Copyright (c) 2017 Louis T. (https://lou.ist/)
+ * MapQL v0.0.3 - A MongoDB inspired ES6 Map() query langauge. - Copyright (c) 2017 Louis T. (https://lou.ist/)
  * Licensed under the MIT license - https://raw.githubusercontent.com/LouisT/MapQL/master/LICENSE
- * Updated on 18-06-2017 at 07:06:49
+ * Updated on 19-06-2017 at 23:06:09
  */
 
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
@@ -885,19 +885,19 @@ class MapQL extends Map {
       set (key = Helpers._null, value = Helpers._null) {
           return this[_set]((value === Helpers._null ? this[_keygen].next() : key), (value !== Helpers._null ? value : key));
       }
-      compile (obj = {}, update = false) {
+      compile (queries = {}, update = false) {
           let results = {
               operator: false,
               list: []
           };
-          for (let key of Object.keys(obj)) {
+          for (let key of Object.keys(queries)) {
               let isLO = this.isLogicalOperator(key);
-              if (Helpers.is(obj[key], 'object')) {
-                 for (let mode of Object.keys(obj[key])) {
-                     results.list.push([key, mode, obj[key][mode]]);
+              if (Helpers.is(queries[key], 'object')) {
+                 for (let mode of Object.keys(queries[key])) {
+                     results.list.push([key, mode, queries[key][mode]]);
                  }
-               } else if (isLO && Array.isArray(obj[key])) {
-                 for (let subobj of obj[key]) {
+               } else if (isLO && Array.isArray(queries[key])) {
+                 for (let subobj of queries[key]) {
                      results.list.push(this.compile(subobj));
                  }
                  results.operator = key;
@@ -906,7 +906,7 @@ class MapQL extends Map {
                  results.list.push([
                      update ? (isUQ ? key : '$set') : (isUQ ? Helpers._null : key),
                      (isUQ || update) ? key : '$eq',
-                     obj[key]
+                     queries[key]
                  ]);
               }
           }
@@ -1004,9 +1004,12 @@ class MapQL extends Map {
               }
           });
       }
-      update (query, modifiers, options = {}) {
-          let opts = Object.assign({ multi: false }, options),
-              cursor = this[opts.multi ? 'find' : 'findOne'](query);
+      update (queries, modifiers, options = {}) {
+          let opts = Object.assign({
+                  multi: false,
+                  projections: {}
+              }, options),
+              cursor = this[Helpers.is(queries, 'string') ? 'findByKey' : 'find'](queries, opts.projections, !opts.multi);
           if (!cursor.empty()) {
              let update = this.compile(modifiers, true);
              if (!!update.list.length) {
@@ -1018,6 +1021,32 @@ class MapQL extends Map {
              }
           }
           return cursor;
+      }
+      remove (queries, multi = false) {
+          let removed = [];
+          if (Helpers.is(queries, '!object')) {
+             for (let key of (Array.isArray(queries) ? queries : [queries])) {
+                 if (this.has(key) && this.delete(key)) {
+                    removed.push(key);
+                 }
+             }
+           } else {
+             let _queries = this.compile(queries);
+             if (!!_queries.list.length) {
+                for (let entry of this.entries()) {
+                    if (this._validate(entry, _queries)) {
+                       if (this.delete(entry[0])) {
+                          if (!multi) {
+                             return [entry[0]];
+                           } else {
+                             removed.push(entry[0]);
+                          }
+                       }
+                    }
+                }
+             }
+          }
+          return removed;
       }
       export (options = {}) {
           let opts = Object.assign({

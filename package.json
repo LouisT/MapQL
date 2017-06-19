@@ -1,6 +1,6 @@
 {
   "name": "mapql",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A MongoDB inspired ES6 Map() query langauge.",
   "main": "index.js",
   "scripts": {
