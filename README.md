@@ -39,8 +39,6 @@ Used with `{Instance}.update(<Query>, <Update>)`.
 * Array
   * $pop
 
-
-
 ### Example: `MapQL.find()`
 ```javascript
 const MapQL = new (require('mapql'))(),
