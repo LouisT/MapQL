@@ -3,7 +3,7 @@
  * Licensed under the MIT license https://raw.githubusercontent.com/LouisT/MapQL/master/LICENSE
  */
 'use strict';
-const MapQL = new (require('../chainable/'))(),
+const MapQL = new (require('../transpile/chainable'))(),
       assert = require('assert');
 
 // Set extra data outside of the set tests,
@@ -147,6 +147,20 @@ describe('Get', () => {
             assert.equal(MapQL.find({ 'array': { '$size': 4 } })[0]._id, 'test11');
         });
     });
+    describe('#findAsync()', () => {
+        it('it should find test0 for findAsync({ \'$eq\': 10 }).then()', () => {
+            return MapQL.findAsync({ '$eq': 10 });
+        });
+        it('it should find test2 for findAsync({ foo: { \'$eq\': \'bar\' } }).then()', () => {
+            return MapQL.findAsync({ foo: { '$eq': 'bar' } });
+        });
+        it('it should find test3 for findAsync({ \'$regex\': /^Str/i }).then()', () => {
+            return MapQL.findAsync({ '$regex': /^Str/i });
+        });
+        it('it should find test4 for findAsync({ qux: { \'$type\': \'number\' } }).then()', () => {
+            return MapQL.findAsync({ qux: { '$type': 'number' } });
+        });
+    });
     describe('#findByKey()', () => {
         it('it should find findByKey_0 with: \'findByKey_0\'', () => {
             assert.equal(MapQL.findByKey('findByKey_0')[0]._id, 'findByKey_0');
@@ -234,7 +248,7 @@ describe('Delete', () => {
     describe('#clear()', () => {
         it('it should remove all entries', () => {
             MapQL.clear()
-            assert.equal([...MapQL.entries()].length, 0);
+            assert.equal(MapQL.size, 0);
         });
     });
 });

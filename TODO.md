@@ -23,10 +23,9 @@ TODO
   * Improve the `Field` update modifiers.
 * ~~Add `MapQL.remove(<Query>[, <multi>])` to remove entries via query.~~
   * Improve type checking of queries passed. Must be Array, String or Object.
-* Implement babel with grunt; add polyfills to work with ES5 browsers.
-  * Add checks to make sure the lib is supported in the user browser.
+* ~~Implement babel with grunt; add polyfills to work with ES5 browsers.~~
   * Improve browserify usage.
-* Add browser tests.
+* ~~Add browser tests.~~
 * Document import/export feature.
 * Everything else.
   * Work on the TODO!
