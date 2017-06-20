@@ -4,19 +4,47 @@ A __[MongoDB]__ inspired __[ES6 Map()]__ query language. - [![Build Status](http
 
 This is a ___WIP___; do __NOT__ use in production yet! See [TODO](TODO.md) for more information.
 
+Testing
+-
+#### Node:
+You can test with node.js via `npm test`.
+
+#### Browser:
+For local browser testing with [karma] run `npm run-script local` or `karma start tests/local.karma.js` to run tests with [PhantomJS] and/or any browsers you have access to.
+
+#### [Sauce Labs]:
+See [karma-sauce-launcher] and [sauce.karma.js](tests/sauce.karma.js).
+
+```sh
+ # See more about Open Source testing at https://saucelabs.com/open-source
+ $ export SAUCE_USERNAME=*****        # Your Sauce Labs username.
+ $ export SAUCE_ACCESS_KEY=*****      # Your Sauce Labs access key.
+ $ karma start tests/sauce.karma.js   # npm run-script sauce
+```
+
 Browser Support
-===
-Currently only supports browsers with [ES6 Map()], [Classes] and [Arrow] features/functions.
+-
+[![Build Status](https://saucelabs.com/browser-matrix/louist-mapql.svg)](https://saucelabs.com/u/louist-mapql)
+
+### ES6 supported browsers:
 ```html
-<!-- MapQL() WITHOUT chain() support -->
+<!-- MapQL() WITHOUT chain() support (es6)-->
 <script src="./dist/MapQL.es6.js"></script>
-<!-- MapQL() WITH chain() support -->
+<!-- MapQL() WITH chain() support (es6) -->
 <script src="./dist/MapQL.es6.chainable.js"></script>
+````
+
+### ES5 (babel transpiled):
+```html
+<!-- MapQL() WITHOUT chain() support-->
+<script src="./dist/MapQL.es5.js"></script>
+<!-- MapQL() WITH chain() support (es6) -->
+<script src="./dist/MapQL.es5.chainable.js"></script>
 ```
 You can use [unpkg] to retrieve dist files.
 
 Implemented [Query Operators]
-===
+-
 Used with `{Instance}.find(<Query>)` and `{Instance}.remove(<Query>[, <Multi (Boolean)>])`.
 
 * Comparison
@@ -31,7 +59,7 @@ Used with `{Instance}.find(<Query>)` and `{Instance}.remove(<Query>[, <Multi (Bo
   * $size
 
 Implemented [Update Operators]
-===
+-
 Used with `{Instance}.update(<Query>, <Update>)`.
 
 * Fields
@@ -39,7 +67,9 @@ Used with `{Instance}.update(<Query>, <Update>)`.
 * Array
   * $pop
 
-### Example: `MapQL.find()`
+
+Example: `MapQL.find()`
+-
 ```javascript
 const MapQL = new (require('mapql'))(),
     util = require('util'),
@@ -115,7 +145,8 @@ MapQL.findAsync({ foo: { '$gt': 2 }, bar: { '$lt': 10 } }).then((results) => {
 });
 ```
 
-### Example: `MapQL.chain()`
+Example: `MapQL.chain()`
+-
 ```javascript
 const MapQL = new (require('mapql/chainable'))(),
       util = require('util');
@@ -185,4 +216,7 @@ console.log('entries:\n%s', util.inspect([...MapQL.entries()], { depth: null }))
 [Query Operators]: https://docs.mongodb.com/manual/reference/operator/query/
 [Update Operators]: https://docs.mongodb.com/manual/reference/operator/update/
 [unpkg]: https://unpkg.com/mapql/
-
+[karma]: http://karma-runner.github.io/
+[karma-sauce-launcher]: https://github.com/karma-runner/karma-sauce-launcher
+[Sauce Labs]: https://saucelabs.com/
+[PhantomJS]: http://phantomjs.org/

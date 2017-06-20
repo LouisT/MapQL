@@ -5,13 +5,41 @@ module.exports = function (grunt) {
         pkg: grunt.file.readJSON('package.json'),
         banner: '/*!\n * MapQL v<%= pkg.version %> - <%= pkg.description %> - Copyright (c) 2017 <%= pkg.author.name %>' +
                 ' (<%= pkg.author.web %>)\n * Licensed under the <%= license.name %> license - <%= license.url %>' +
-                '\n * Updated on <%= grunt.template.today("dd-mm-yyyy") %> at <%= grunt.template.today("HH:mm:ss") %>\n */\n',
+                '\n * Updated on <%= grunt.template.today("dd-mm-yyyy") %> at <%= grunt.template.today("HH:mm:ss") %>\n */',
         clean: {
            default: ['dist/*']
         },
         browserify: {
-            'dist/MapQL.es6.js': ['./index.js'],
-            'dist/MapQL.es6.chainable.js': ['./chainable/index.js']
+            default: {
+                files: {
+                    'dist/MapQL.es6.js': ['./index.js'],
+                    'dist/MapQL.es6.chainable.js': ['./chainable/index.js']
+                }
+            },
+            babelify: {
+                options: {
+                    transform: [[ 'babelify', {
+                        presets: ['es2015'],
+                        plugins: [
+                            ["babel-plugin-transform-builtin-extend", {
+                                globals: ["Array", "Map"]
+                            }]
+                        ]
+                    }]]
+                },
+                files: {
+                    'dist/MapQL.es5.js': ['./transpile/polyfill.js'],
+                    'dist/MapQL.es5.chainable.js': ['./transpile/chainable.js']
+                }
+            }
+        },
+        uglify: {
+            default: {
+                files: {
+                    'dist/MapQL.es5.js': ['dist/MapQL.es5.js'],
+                    'dist/MapQL.es5.chainable.js': ['dist/MapQL.es5.chainable.js']
+                }
+           }
         },
         comments: {
             default: {
@@ -31,7 +59,7 @@ module.exports = function (grunt) {
                     linebreak: true
                 },
                 files: {
-                    src: ['dist/MapQL.es6.js']
+                    src: ['dist/MapQL.es6.js', 'dist/MapQL.es5.js']
                 }
             },
             chainable: {
@@ -41,10 +69,10 @@ module.exports = function (grunt) {
                     linebreak: true
                 },
                 files: {
-                    src: ['dist/MapQL.es6.chainable.js']
+                    src: ['dist/MapQL.es6.chainable.js', 'dist/MapQL.es5.chainable.js']
                 }
             }
         }
     });
-    grunt.registerTask('default', ['clean', 'browserify', 'comments', 'usebanner']);
+    grunt.registerTask('default', ['clean', 'browserify:default', 'browserify:babelify', 'uglify', 'comments', 'usebanner']);
 };
