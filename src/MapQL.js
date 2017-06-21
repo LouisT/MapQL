@@ -9,22 +9,18 @@ const queryOperators = require('./operators/Query'),
       Document = require('./Document'),
       Cursor = require('./Cursor'),
       Helpers = require('./Helpers'),
-      GenerateID = require('./GenerateID'),
-      _set = Symbol('_set'),
-      _keygen = Symbol('_keygen');
+      GenerateID = new (require('./GenerateID'))();
 
 class MapQL extends Map {
       constructor (_map) {
           super(_map);
-          this[_set] = Map.prototype.set;
-          this[_keygen] = new GenerateID();
       }
 
       /*
        * Allow MapQL to generate an incremented key if key is omitted.
        */
       set (key = Helpers._null, value = Helpers._null) {
-          return this[_set]((value === Helpers._null ? this[_keygen].next() : key), (value !== Helpers._null ? value : key));
+          return Map.prototype.set.call(this, (value === Helpers._null ? GenerateID.next() : key), (value !== Helpers._null ? value : key));
       }
 
       /*

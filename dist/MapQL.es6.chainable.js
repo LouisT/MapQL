@@ -1,7 +1,7 @@
 /*!
- * MapQL v0.0.4 - A MongoDB inspired ES6 Map() query langauge. - Copyright (c) 2017 Louis T. (https://lou.ist/)
+ * MapQL v0.0.5 - A MongoDB inspired ES6 Map() query langauge. - Copyright (c) 2017 Louis T. (https://lou.ist/)
  * Licensed under the MIT license - https://raw.githubusercontent.com/LouisT/MapQL/master/LICENSE
- * Updated on 20-06-2017 at 22:06:48
+ * Updated on 21-06-2017 at 02:06:28
  */
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
@@ -871,18 +871,14 @@ const queryOperators = require('./operators/Query'),
       Document = require('./Document'),
       Cursor = require('./Cursor'),
       Helpers = require('./Helpers'),
-      GenerateID = require('./GenerateID'),
-      _set = Symbol('_set'),
-      _keygen = Symbol('_keygen');
+      GenerateID = new (require('./GenerateID'))();
 
 class MapQL extends Map {
       constructor (_map) {
           super(_map);
-          this[_set] = Map.prototype.set;
-          this[_keygen] = new GenerateID();
       }
       set (key = Helpers._null, value = Helpers._null) {
-          return this[_set]((value === Helpers._null ? this[_keygen].next() : key), (value !== Helpers._null ? value : key));
+          return Map.prototype.set.call(this, (value === Helpers._null ? GenerateID.next() : key), (value !== Helpers._null ? value : key));
       }
       compile (queries = {}, update = false) {
           let results = {
