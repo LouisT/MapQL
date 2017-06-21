@@ -23,6 +23,10 @@ module.exports = function (grunt) {
                         plugins: [
                             ["babel-plugin-transform-builtin-extend", {
                                 globals: ["Array", "Map"]
+                            }],
+                            ["transform-runtime", {
+                                polyfill: false,
+                                regenerator: true
                             }]
                         ]
                     }]]
