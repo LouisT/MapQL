@@ -67,6 +67,11 @@ Used with `{Instance}.update(<Query>, <Update>)`.
 * Array
   * $pop
 
+Import/Export
+-
+Please note that importing and exporting data is highly experimental. This feature currently exports as json,
+so certain keys or references may not be supported. Any input on how to improve import/export of `Map()` would
+be greatly appreciated. Please see #5 for further information.
 
 Example: `MapQL.find()`
 -

@@ -264,8 +264,7 @@ class MapQL extends Map {
       /*
        * Export current Document's to JSON key/value.
        *
-       * Note: Any 'null' key gets converted to a string. Since null is a valid key,
-       *       import() automatically converts every "null" string into null.
+       * Please see README about current import/export downfalls.
        */
       export (options = {}) {
           let opts = Object.assign({
@@ -274,20 +273,26 @@ class MapQL extends Map {
               pretty: false,
           }, options);
           try {
-              let obj = Object.create(null);
-              for (let [key, val] of this) {
-                  obj[key] = val;
-              }
+              let _toString = (m) => {
+                      return Helpers.is(m, ['!null', '!object', '!number', '!boolean', '!array']) ? m.toString() : m;
+                  },
+                  _export = (m) => {
+                      return Helpers.is(m, 'map') ? [...m].map(([k,v]) => [_export(k), _export(v), Helpers.getType(k), Helpers.getType(v)]) : _toString(m)
+                  },
+                  exported = _export(this);
               return ((res) => {
                   return (opts.promise ? Promise.resolve(res) : res);
-              })(opts.stringify ? JSON.stringify(obj, true, (opts.pretty ? 4 : 0)) : obj);
+              })(opts.stringify ? JSON.stringify(exported, null, (opts.pretty ? 4 : 0)) : exported);
+
            } catch (error) {
-             return (promise ? Promise.reject(error) : error);
+             return (opts.promise ? Promise.reject(error) : error);
           }
       }
 
       /*
        * Import JSON key/value objects as entries; usually from export().
+       *
+       * Please see README about current import/export downfalls.
        *
        * Note: If a string is passed, attempt to parse with JSON.parse(),
        *       otherwise assume to be a valid Object.
@@ -297,10 +302,19 @@ class MapQL extends Map {
               promise: false
           }, options);
           try {
-              let obj = (Helpers.is(json, 'string') ? JSON.parse(json) : json);
-              for (let key of Object.keys(obj)) {
-                  this.set((key === "null" ? null : key), obj[key]);
+              // XXX: Move this (fromType) to a different file for easier editing.
+              function fromType (entry, type) {
+                       switch (type.toLowerCase()) {
+                              // XXX: Add more data types!
+                              case 'map': return (new MapQL()).import(entry);
+                              case 'function': return Function(`return ${entry}`)();
+                              case 'array': return Array.from(entry);
+                              default: return entry;
+                       }
               }
+              (Helpers.is(json, 'string') ? JSON.parse(json) : json).map((entry) => {
+                  this.set(fromType(entry[0], entry[2] || ''), fromType(entry[1], entry[3] || ''));
+              });
            } catch (error) {
               if (opts.promise) {
                  return Promise.reject(error);

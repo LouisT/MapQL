@@ -1,7 +1,7 @@
 /*!
  * MapQL v0.0.5 - A MongoDB inspired ES6 Map() query langauge. - Copyright (c) 2017 Louis T. (https://lou.ist/)
  * Licensed under the MIT license - https://raw.githubusercontent.com/LouisT/MapQL/master/LICENSE
- * Updated on 21-06-2017 at 02:06:28
+ * Updated on 23-06-2017 at 23:06:47
  */
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
@@ -782,9 +782,12 @@ function dot (keys = [], obj = {}, options = {}) {
              return undefined; // Value must not exist; return undefined!
          }
 }
+function getType (val) {
+         return Object.prototype.toString.call(val).toLowerCase().match(/(?:\[object (.+)\])/i)[1]
+};
 function is (val, type) {
          try {
-             return (/^!/.test(type) !== (Object.prototype.toString.call(val).toLowerCase() === `[object ${type.toLowerCase().replace(/^!/,'')}]`));
+             return (/^!/.test(type) !== (getType(val) === type.toLowerCase().replace(/^!/,'')));
           } catch (error) {
              return false;
          }
@@ -797,8 +800,9 @@ module.exports = {
                }) : dot((keys !== _null ? String(keys).trim().split('.') : []), obj, options);
     },
     is: (val, type) => {
-        return Array.isArray(type) ? type.some((t) => is(val, t)) : is(val, type);
-    }
+        return Array.isArray(type) ? type.every((t) => is(val, t)) : is(val, type);
+    },
+    getType: getType
 };
 
 },{}],22:[function(require,module,exports){
@@ -988,15 +992,19 @@ class MapQL extends Map {
               pretty: false,
           }, options);
           try {
-              let obj = Object.create(null);
-              for (let [key, val] of this) {
-                  obj[key] = val;
-              }
+              let _toString = (m) => {
+                      return Helpers.is(m, ['!null', '!object', '!number', '!boolean', '!array']) ? m.toString() : m;
+                  },
+                  _export = (m) => {
+                      return Helpers.is(m, 'map') ? [...m].map(([k,v]) => [_export(k), _export(v), Helpers.getType(k), Helpers.getType(v)]) : _toString(m)
+                  },
+                  exported = _export(this);
               return ((res) => {
                   return (opts.promise ? Promise.resolve(res) : res);
-              })(opts.stringify ? JSON.stringify(obj, true, (opts.pretty ? 4 : 0)) : obj);
+              })(opts.stringify ? JSON.stringify(exported, null, (opts.pretty ? 4 : 0)) : exported);
+
            } catch (error) {
-             return (promise ? Promise.reject(error) : error);
+             return (opts.promise ? Promise.reject(error) : error);
           }
       }
       import (json, options = {}) {
@@ -1004,10 +1012,17 @@ class MapQL extends Map {
               promise: false
           }, options);
           try {
-              let obj = (Helpers.is(json, 'string') ? JSON.parse(json) : json);
-              for (let key of Object.keys(obj)) {
-                  this.set((key === "null" ? null : key), obj[key]);
+              function fromType (entry, type) {
+                       switch (type.toLowerCase()) {
+                              case 'map': return (new MapQL()).import(entry);
+                              case 'function': return Function(`return ${entry}`)();
+                              case 'array': return Array.from(entry);
+                              default: return entry;
+                       }
               }
+              (Helpers.is(json, 'string') ? JSON.parse(json) : json).map((entry) => {
+                  this.set(fromType(entry[0], entry[2] || ''), fromType(entry[1], entry[3] || ''));
+              });
            } catch (error) {
               if (opts.promise) {
                  return Promise.reject(error);

@@ -40,11 +40,18 @@ function dot (keys = [], obj = {}, options = {}) {
 }
 
 /*
+ * Get the variable type.
+ */
+function getType (val) {
+         return Object.prototype.toString.call(val).toLowerCase().match(/(?:\[object (.+)\])/i)[1]
+};
+
+/*
  * Test if a variable is the provided type; if type arg is prefixed with `!` test if NOT type.
  */
 function is (val, type) {
          try {
-             return (/^!/.test(type) !== (Object.prototype.toString.call(val).toLowerCase() === `[object ${type.toLowerCase().replace(/^!/,'')}]`));
+             return (/^!/.test(type) !== (getType(val) === type.toLowerCase().replace(/^!/,'')));
           } catch (error) {
              return false;
          }
@@ -63,6 +70,7 @@ module.exports = {
                }) : dot((keys !== _null ? String(keys).trim().split('.') : []), obj, options);
     },
     is: (val, type) => {
-        return Array.isArray(type) ? type.some((t) => is(val, t)) : is(val, type);
-    }
+        return Array.isArray(type) ? type.every((t) => is(val, t)) : is(val, type);
+    },
+    getType: getType
 };
