@@ -385,7 +385,7 @@ function fromType (entry, type) {
              case 'Uint8Array':
              case 'Buffer':
                  try {
-                     if (Uint8Array && Helpers.getType(Uint8Array) === 'function') {
+                     if (Uint8Array && Helpers.getType(Uint8Array) === 'Function') {
                         return new Uint8Array(entry);
                      }
                    } catch (error) {
