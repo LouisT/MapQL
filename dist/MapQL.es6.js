@@ -1,7 +1,7 @@
 /*!
  * MapQL v0.0.7 - A MongoDB inspired ES6 Map() query langauge. - Copyright (c) 2017 Louis T. (https://lou.ist/)
  * Licensed under the MIT license - https://raw.githubusercontent.com/LouisT/MapQL/master/LICENSE
- * Updated on 28-06-2017 at 07:06:05
+ * Updated on 28-06-2017 at 07:06:02
  */
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
@@ -2638,7 +2638,7 @@ function deepClone (obj, _Map = Map) {
          if (is(obj, 'null') || is(obj, '!object', true)) {
             return obj;
          }
-         switch (obj.constructor.name) {
+         switch (obj.constructor.name.toLowerCase()) {
                 case 'date':
                     return new Date(obj.getTime());
                 case 'map': case 'mapql':
@@ -2909,6 +2909,7 @@ class MapQL extends Map {
                       }
                       return Helpers.is(m, ['!null', '!number', '!boolean', '!object']) ? m.toString() : m;
                   },
+
                   exported = _export(Helpers.deepClone(this, MapQL));
 
               return ((res) => {

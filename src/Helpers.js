@@ -66,7 +66,7 @@ function deepClone (obj, _Map = Map) {
          if (is(obj, 'null') || is(obj, '!object', true)) {
             return obj;
          }
-         switch (obj.constructor.name) {
+         switch (obj.constructor.name.toLowerCase()) {
                 case 'date':
                     return new Date(obj.getTime());
                 case 'map': case 'mapql':
