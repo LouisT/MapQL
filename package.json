@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha tests/node.js",
-    "local": "karma start tests/local.karma.js",
+    "local": "karma start tests/local.karma.js --debug",
     "sauce": "karma start tests/sauce.karma.js"
   },
   "repository": {

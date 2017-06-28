@@ -6,10 +6,11 @@
 const queryOperators = require('./operators/Query'),
       logicalOperators = require('./operators/Logical'),
       updateOperators = require('./operators/Update'),
-      Document = require('./Document'),
+      MapQLDocument = require('./Document'),
       Cursor = require('./Cursor'),
       Helpers = require('./Helpers'),
-      GenerateID = new (require('./GenerateID'))();
+      GenerateID = new (require('./GenerateID'))(),
+      isEqual = require('is-equal');
 
 class MapQL extends Map {
       constructor (_map) {
@@ -22,6 +23,35 @@ class MapQL extends Map {
       set (key = Helpers._null, value = Helpers._null) {
           return Map.prototype.set.call(this, (value === Helpers._null ? GenerateID.next() : key), (value !== Helpers._null ? value : key));
       }
+
+      /*
+       *  Check if MapQL has a specific key, if strict is false return
+       *  true if the keys are only similar.
+       */
+      has (key, strict = true) {
+          if (!strict) {
+             return [...this.keys()].some((_key) => {
+                 return isEqual(key, _key);
+             });
+          }
+          return Map.prototype.has.call(this, key);
+      }
+      /*
+       * Get a key if it exists, if strict is false return value if the
+       * keys are only similar.
+       */
+      get (key, strict = true) {
+          if (!strict) {
+             for (let [_key, value] of [...this.entries()]) {
+                 if (isEqual(key, _key)) {
+                    return value;
+                 }
+             }
+             return Helpers._null;
+          }
+          return Map.prototype.get.call(this, key);
+      }
+
 
       /*
        * Convert the query/update object to an Object with an Array
@@ -62,7 +92,7 @@ class MapQL extends Map {
        * Validate a possible Document.
        */
       isDocument (obj) {
-          return Document.isDocument(obj);
+          return MapQLDocument.isDocument(obj);
       }
 
       /*
@@ -92,7 +122,7 @@ class MapQL extends Map {
        * Check if a string is a query operator.
        */
       isQueryOperator (qs = Helpers._null) {
-          return this.queryOperators.hasOwnProperty(qs) == true;
+          return this.queryOperators.hasOwnProperty(qs) === true;
       }
 
       /*
@@ -106,7 +136,7 @@ class MapQL extends Map {
        * Check if a string is a logic operator.
        */
       isLogicalOperator (lo = Helpers._null) {
-          return this.logicalOperators.hasOwnProperty(lo) == true;
+          return this.logicalOperators.hasOwnProperty(lo) === true;
       }
 
       /*
@@ -120,7 +150,7 @@ class MapQL extends Map {
        * Check if a string is an update operator.
        */
       isUpdateOperator (uo = Helpers._null) {
-          return this.updateOperators.hasOwnProperty(uo) == true;
+          return this.updateOperators.hasOwnProperty(uo) === true;
       }
 
       /*
@@ -154,8 +184,9 @@ class MapQL extends Map {
        */
       find (queries = {}, projections = {}, one = false, bykey = false) {
           if (Helpers.is(queries, '!object')) {
-             if (this.has(queries)) {
-                return new Cursor(queries, true).add(new Document(queries, this.get(queries)));
+             let value;
+             if ((value = this.get(queries, false)) !== Helpers._null) {
+                return new Cursor(queries, true).add(new MapQLDocument(queries, value));
              }
              queries = { '$eq' : queries };
           }
@@ -164,7 +195,7 @@ class MapQL extends Map {
              let cursor = new Cursor(queries, bykey);
              for (let entry of this.entries()) {
                  if (this._validate(!bykey ? entry : [entry[0], entry[0]], _queries)) {
-                    cursor.add(new Document(entry[0], entry[1], bykey));
+                    cursor.add(new MapQLDocument(entry[0], entry[1], bykey));
                     if (one) {
                        return cursor;
                     }
@@ -172,7 +203,7 @@ class MapQL extends Map {
              }
              return cursor;
            } else {
-             return new Cursor().add(Document.convert(one ? [[...this.entries()][0]] : [...this.entries()]));
+             return new Cursor().add(MapQLDocument.convert(one ? [[...this.entries()][0]] : [...this.entries()]));
           }
       }
 
@@ -198,7 +229,7 @@ class MapQL extends Map {
               try {
                   let results = this.find(queries, projections, one);
                   return !!results.length ? resolve(results) : reject(new Error('No entries found.'));
-               } catch (error) {
+                } catch (error) {
                   reject(error);
               }
           });
@@ -273,19 +304,27 @@ class MapQL extends Map {
               pretty: false,
           }, options);
           try {
-              let _toString = (m) => {
-                      return Helpers.is(m, ['!null', '!object', '!number', '!boolean', '!array']) ? m.toString() : m;
+              let _export = (m) => {
+                      if (Helpers.is(m, 'set')) {
+                         return [...m].map((k) => [_export(k), Helpers.typeToInt(Helpers.getType(k))]);
+                       } else if (Helpers.is(m, 'map')) {
+                         return [...m].map(([k,v]) => [_export(k), _export(v), Helpers.typeToInt(Helpers.getType(k)), Helpers.typeToInt(Helpers.getType(v))]);
+                       } else if (Helpers.is(m, 'object')) {
+                         for (let key of Object.keys(m)) {
+                             m[key] = [_export(m[key]), Helpers.typeToInt(Helpers.getType(m[key]))];
+                         }
+                       } else if (Helpers.is(m, 'array')) {
+                         return m.map((value) => { return [_export(value), Helpers.typeToInt(Helpers.getType(value))]; });
+                      }
+                      return Helpers.is(m, ['!null', '!number', '!boolean', '!object']) ? m.toString() : m;
                   },
-                  _export = (m) => {
-                      return Helpers.is(m, 'map') ? [...m].map(([k,v]) => [_export(k), _export(v), Helpers.getType(k), Helpers.getType(v)]) : _toString(m)
-                  },
-                  exported = _export(this);
+                  exported = _export(Helpers.deepClone(this, MapQL));
+
               return ((res) => {
                   return (opts.promise ? Promise.resolve(res) : res);
               })(opts.stringify ? JSON.stringify(exported, null, (opts.pretty ? 4 : 0)) : exported);
-
-           } catch (error) {
-             return (opts.promise ? Promise.reject(error) : error);
+            } catch (error) {
+              return (opts.promise ? Promise.reject(error) : error);
           }
       }
 
@@ -302,20 +341,10 @@ class MapQL extends Map {
               promise: false
           }, options);
           try {
-              // XXX: Move this (fromType) to a different file for easier editing.
-              function fromType (entry, type) {
-                       switch (type.toLowerCase()) {
-                              // XXX: Add more data types!
-                              case 'map': return (new MapQL()).import(entry);
-                              case 'function': return Function(`return ${entry}`)();
-                              case 'array': return Array.from(entry);
-                              default: return entry;
-                       }
-              }
               (Helpers.is(json, 'string') ? JSON.parse(json) : json).map((entry) => {
                   this.set(fromType(entry[0], entry[2] || ''), fromType(entry[1], entry[3] || ''));
               });
-           } catch (error) {
+            } catch (error) {
               if (opts.promise) {
                  return Promise.reject(error);
                } else {
@@ -324,6 +353,48 @@ class MapQL extends Map {
           }
           return (opts.promise ? Promise.resolve(this) : this);
       }
+}
+
+/*
+ * Convert strings to required data type, used in import().
+ */
+let Mapper = (value) => {
+    return value.map((val) => {
+        return fromType(val[0], val[1]);
+    });
+};
+function fromType (entry, type) {
+         let inttype = Helpers.intToType(type);
+         switch (inttype) {
+             case 'Map':
+                 return (new MapQL()).import(entry); // Convert all 'Map()' entries to MapQL.
+             case 'Set':
+                 return new Set(Mapper(entry));
+             // XXX: Function() is a form of eval()!
+             case 'Function':
+                return new Function(`return ${entry};`)();
+             case 'Array':
+                return Mapper(entry);
+             case 'Object':
+                 return ((obj) => {
+                     for (let key of Object.keys(obj)) {
+                         obj[key] = fromType(obj[key][0], obj[key][1]);
+                     }
+                     return obj;
+                 })(entry);
+             case 'Uint8Array':
+             case 'Buffer':
+                 try {
+                     if (Uint8Array && Helpers.getType(Uint8Array) === 'function') {
+                        return new Uint8Array(entry);
+                     }
+                   } catch (error) {
+                     return Buffer.from(entry);
+                 }
+             case 'RegExp':
+                 return RegExp.apply(null, entry.match(/\/(.*?)\/([gimuy])?$/).slice(1));
+             default: return entry;
+         }
 }
 
 /*

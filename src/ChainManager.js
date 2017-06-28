@@ -58,7 +58,7 @@ class ChainManager {
       _getOperatorChain (key, val = Helpers._null, $qo = '$eq') {
           try {
               return this.MapQL.constructor.queryOperators[$qo].chain(key, val, $qo);
-           } catch (error) {
+            } catch (error) {
               return val !== Helpers._null ? { [key] : { [$qo]: val } } : { [$qo]: key };
           }
       }

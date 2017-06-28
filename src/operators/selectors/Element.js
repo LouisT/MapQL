@@ -14,9 +14,9 @@ module.exports = {
         },
         fn: function (val, bool, keys = Helpers._null, entry) {
             try {
-               return bool === (Helpers.dotNotation(keys, entry[1], { defined: true }) !== undefined);
-             } catch (error) {
-               return keys === Helpers._null ? (bool === undefined ? true : bool) : false;
+                return bool === (Helpers.dotNotation(keys, entry[1], { defined: true }) !== undefined);
+              } catch (error) {
+                return keys === Helpers._null ? (bool === undefined ? true : bool) : false;
             }
         }
     },

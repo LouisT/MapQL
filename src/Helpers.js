@@ -4,7 +4,8 @@
  */
 'use strict';
 // Create a null Symbol as 'null' is a valid Map() key/value.
-const _null = Symbol(null);
+const _null = Symbol(null),
+      { typeToInt, intToType } = require('./DataTypes');
 
 /*
  * Get/set a value from an Object/Array based on dot notation.
@@ -43,18 +44,63 @@ function dot (keys = [], obj = {}, options = {}) {
  * Get the variable type.
  */
 function getType (val) {
-         return Object.prototype.toString.call(val).toLowerCase().match(/(?:\[object (.+)\])/i)[1]
+         return Object.prototype.toString.call(val).match(/(?:\[object (.+)\])/i)[1]
 };
 
 /*
  * Test if a variable is the provided type; if type arg is prefixed with `!` test if NOT type.
+ * If typeOf is true, use 'typeof value' instead of getType.
  */
-function is (val, type) {
+function is (val, type, typeOf = false) {
          try {
-             return (/^!/.test(type) !== (getType(val) === type.toLowerCase().replace(/^!/,'')));
-          } catch (error) {
+             return (/^!/.test(type) !== ((typeOf ? typeof val : getType(val).toLowerCase()) === type.toLowerCase().replace(/^!/,'')));
+           } catch (error) {
              return false;
          }
+}
+
+/*
+ * Deep clone Map/MapQL objects.
+ */
+function deepClone (obj, _Map = Map) {
+         if (is(obj, 'null') || is(obj, '!object', true)) {
+            return obj;
+         }
+         switch (obj.constructor.name) {
+                case 'date':
+                    return new Date(obj.getTime());
+                case 'map': case 'mapql':
+                    return new _Map(deepClone(Array.from(obj), _Map));
+                case 'set':
+                    return new Set(deepClone(Array.from(obj), _Map));
+                case 'regexp':
+                    return new RegExp(obj);
+                case 'array':
+                    return new Array(obj.length).fill(0).map((val, idx) => {
+                        return deepClone(obj[idx], _Map)
+                    });
+                case 'object':
+                    return ((cloned) => {
+                        for (let prop in obj) {
+                            if (obj.hasOwnProperty(prop)) {
+                               cloned[prop] = deepClone(obj[prop], _Map);
+                            }
+                        }
+                        return cloned;
+                    })({});
+                default: return obj;
+         }
+}
+
+/*
+ * A small polyfill to get the constructor name for IE11.
+ */
+if (Function.prototype.name === undefined && Object.defineProperty !== undefined) {
+   Object.defineProperty(Function.prototype, 'name', {
+       get: ()=>{
+           try { return /^function\s+([\w\$]+)\s*\(/.exec((this).toString())[1]; } catch (error) { return ''; }
+       }, set: ()=>{}
+   });
 }
 
 /*
@@ -69,8 +115,11 @@ module.exports = {
                    return dot(String(Array.isArray(keys) ? keys[idx] : keys).trim().split('.'), _obj, options);
                }) : dot((keys !== _null ? String(keys).trim().split('.') : []), obj, options);
     },
-    is: (val, type) => {
-        return Array.isArray(type) ? type.every((t) => is(val, t)) : is(val, type);
+    is: (val, type, typeOf = false, some = false) => {
+        return Array.isArray(type) ? type[some ? 'some' : 'every']((t) => is(val, t, typeOf)) : is(val, type, typeOf);
     },
-    getType: getType
+    getType: getType,
+    deepClone: deepClone,
+    typeToInt: typeToInt,
+    intToType: intToType
 };

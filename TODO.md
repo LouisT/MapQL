@@ -27,6 +27,8 @@ TODO
   * Improve browserify usage.
 * ~~Add browser tests.~~
 * Document import/export feature.
+  * Add more support for extended data types.
+    * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Typed_arrays
 * Everything else.
   * Work on the TODO!
 

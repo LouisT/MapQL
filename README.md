@@ -73,6 +73,12 @@ Please note that importing and exporting data is highly experimental. This featu
 so certain keys or references may not be supported. Any input on how to improve import/export of `Map()` would
 be greatly appreciated. Please see #5 for further information.
 
+Current (known) supported [data types](/src/DataTypes.js):
+* [Primitives]
+  * Boolean, Null, Undefined, Number, String, Symbol, Object
+* Extended support
+  * Array, Function, Date, Map, Set, Buffer/Uint8Array, RegExp
+
 Example: `MapQL.find()`
 -
 ```javascript
@@ -225,3 +231,4 @@ console.log('entries:\n%s', util.inspect([...MapQL.entries()], { depth: null }))
 [karma-sauce-launcher]: https://github.com/karma-runner/karma-sauce-launcher
 [Sauce Labs]: https://saucelabs.com/
 [PhantomJS]: http://phantomjs.org/
+[Primitives]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Data_types
