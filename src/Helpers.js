@@ -66,7 +66,7 @@ function deepClone (obj, _Map = Map) {
          if (is(obj, 'null') || is(obj, '!object', true)) {
             return obj;
          }
-         switch (obj.constructor.name.toLowerCase()) {
+         switch (getType(obj).toLowerCase()) {
                 case 'date':
                     return new Date(obj.getTime());
                 case 'map': case 'mapql':
@@ -90,17 +90,6 @@ function deepClone (obj, _Map = Map) {
                     })({});
                 default: return obj;
          }
-}
-
-/*
- * A small polyfill to get the constructor name for IE11.
- */
-if (Function.prototype.name === undefined && Object.defineProperty !== undefined) {
-   Object.defineProperty(Function.prototype, 'name', {
-       get: ()=>{
-           try { return /^function\s+([\w\$]+)\s*\(/.exec((this).toString())[1]; } catch (error) { return ''; }
-       }, set: ()=>{}
-   });
 }
 
 /*
