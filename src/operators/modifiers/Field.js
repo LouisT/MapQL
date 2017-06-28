@@ -9,7 +9,7 @@ const isEqual = require('is-equal'),
 module.exports = {
     '$set': {
         fn: function (key, val, entry) {
-            Helpers.is(entry.value, '!object') ? this.set(entry._id, (entry.value = val)) : Helpers.dotNotation(key, entry.value, {
+            Helpers.is(entry.value, '!Object') ? this.set(entry._id, (entry.value = val)) : Helpers.dotNotation(key, entry.value, {
                 value: () => {
                     return val;
                 }
@@ -19,7 +19,7 @@ module.exports = {
     '$inc': {
         fn: function (key, val, entry) {
             let _val = parseInt(val, 10);
-            Helpers.is(entry.value, '!object') ? this.set(entry._id, (entry.value = (parseInt(entry.value, 10) + _val))) : Helpers.dotNotation(key, entry.value, {
+            Helpers.is(entry.value, '!Object') ? this.set(entry._id, (entry.value = (parseInt(entry.value, 10) + _val))) : Helpers.dotNotation(key, entry.value, {
                 value: (current) => {
                     return (current !== Helpers._null ? parseInt(current, 10) + _val : _val);
                 }
@@ -29,7 +29,7 @@ module.exports = {
     '$mul': {
         fn: function (key, val, entry) {
             let _val = parseInt(val, 10);
-            Helpers.is(entry.value, '!object') ? this.set(entry._id, (entry.value = parseInt(entry.value, 10) * _val)) : Helpers.dotNotation(key, entry.value, {
+            Helpers.is(entry.value, '!Object') ? this.set(entry._id, (entry.value = parseInt(entry.value, 10) * _val)) : Helpers.dotNotation(key, entry.value, {
                 value: (current) => {
                     return (current !== Helpers._null ? parseInt(current, 10) * _val : _val);
                 }
@@ -38,7 +38,7 @@ module.exports = {
     },
     '$unset': {
         fn: function (key, val, entry) {
-            Helpers.is(entry.value, '!object') ? this.delete(entry._id, (entry.value = undefined)) : Helpers.dotNotation(key, entry.value, { unset: true });
+            Helpers.is(entry.value, '!Object') ? this.delete(entry._id, (entry.value = undefined)) : Helpers.dotNotation(key, entry.value, { unset: true });
         }
     }
 };

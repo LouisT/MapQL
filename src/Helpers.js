@@ -34,7 +34,7 @@ function dot (keys = [], obj = {}, options = {}) {
              };
 
          try {
-             return _apply(keys, obj, (opts.value ? (is(opts.value, '!function') ? (current, next) => { return next } : opts.value) : opts.value));
+             return _apply(keys, obj, (opts.value ? (is(opts.value, '!Function') ? (current, next) => { return next } : opts.value) : opts.value));
            } catch (e) {
              return undefined; // Value must not exist; return undefined!
          }
@@ -63,23 +63,23 @@ function is (val, type, typeOf = false) {
  * Deep clone Map/MapQL objects.
  */
 function deepClone (obj, _Map = Map) {
-         if (is(obj, 'null') || is(obj, '!object', true)) {
+         if (is(obj, 'Null') || is(obj, '!Object', true)) {
             return obj;
          }
-         switch (getType(obj).toLowerCase()) {
-                case 'date':
+         switch (getType(obj)) {
+                case 'Date':
                     return new Date(obj.getTime());
-                case 'map': case 'mapql':
+                case 'Map': case 'MapQL':
                     return new _Map(deepClone(Array.from(obj), _Map));
-                case 'set':
+                case 'Set':
                     return new Set(deepClone(Array.from(obj), _Map));
-                case 'regexp':
+                case 'RegExp':
                     return new RegExp(obj);
-                case 'array':
+                case 'Array':
                     return new Array(obj.length).fill(0).map((val, idx) => {
                         return deepClone(obj[idx], _Map)
                     });
-                case 'object':
+                case 'Object':
                     return ((cloned) => {
                         for (let prop in obj) {
                             if (obj.hasOwnProperty(prop)) {

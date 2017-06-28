@@ -43,7 +43,7 @@ class Cursor extends Array {
       sort (obj = {}) {
           Object.keys(obj).forEach((key, idx) => {
               Array.prototype.sort.call(this, (a, b) => {
-                  if (!(Helpers.is(a.value, 'object') && Helpers.is(b.value, 'object'))) {
+                  if (!(Helpers.is(a.value, 'Object') && Helpers.is(b.value, 'Object'))) {
                      return 0;
                   }
                   let vals = Helpers.dotNotation(key, [a.value, b.value]);
@@ -59,7 +59,7 @@ class Cursor extends Array {
        * Return a specified number of results, default to 1.
        */
       limit (num = 1) {
-          return Helpers.is((this[_limit] = num), 'number') ? this.slice(0, this[_limit]) : this;
+          return Helpers.is((this[_limit] = num), 'Number') ? this.slice(0, this[_limit]) : this;
       }
 }
 

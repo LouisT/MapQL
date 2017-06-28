@@ -8,7 +8,7 @@ const Helpers = require('../../Helpers');
 module.exports = {
     '$exists': {
         chain: function (key, val) {
-            let isbool = Helpers.is(key, 'boolean'),
+            let isbool = Helpers.is(key, 'Boolean'),
                 check = val !== Helpers._null ? val : (isbool ? key : true);
             return !isbool || val !== Helpers._null ? { [key] : { '$exists': check } } : { '$exists': check };
         },

@@ -64,7 +64,7 @@ class MapQL extends Map {
           };
           for (let key of Object.keys(queries)) {
               let isLO = this.isLogicalOperator(key);
-              if (Helpers.is(queries[key], 'object')) {
+              if (Helpers.is(queries[key], 'Object')) {
                  for (let mode of Object.keys(queries[key])) {
                      results.list.push([key, mode, queries[key][mode]]);
                  }
@@ -183,7 +183,7 @@ class MapQL extends Map {
        * Check all entries against every provided query selector.
        */
       find (queries = {}, projections = {}, one = false, bykey = false) {
-          if (Helpers.is(queries, '!object')) {
+          if (Helpers.is(queries, '!Object')) {
              let value;
              if ((value = this.get(queries, false)) !== Helpers._null) {
                 return new Cursor(queries, true).add(new MapQLDocument(queries, value));
@@ -245,7 +245,7 @@ class MapQL extends Map {
                   multi: false,
                   projections: {}
               }, options),
-              cursor = this[Helpers.is(queries, 'string') ? 'findByKey' : 'find'](queries, opts.projections, !opts.multi);
+              cursor = this[Helpers.is(queries, 'String') ? 'findByKey' : 'find'](queries, opts.projections, !opts.multi);
           if (!cursor.empty()) {
              let update = this.compile(modifiers, true);
              if (!!update.list.length) {
@@ -267,7 +267,7 @@ class MapQL extends Map {
        */
       remove (queries, multi = false) {
           let removed = [];
-          if (Helpers.is(queries, '!object')) {
+          if (Helpers.is(queries, '!Object')) {
              for (let key of (Array.isArray(queries) ? queries : [queries])) {
                  if (this.has(key) && this.delete(key)) {
                     removed.push(key);
@@ -305,18 +305,18 @@ class MapQL extends Map {
           }, options);
           try {
               let _export = (m) => {
-                      if (Helpers.is(m, 'set')) {
+                      if (Helpers.is(m, 'Set')) {
                          return [...m].map((k) => [_export(k), Helpers.typeToInt(Helpers.getType(k))]);
-                       } else if (Helpers.is(m, 'map')) {
+                       } else if (Helpers.is(m, 'Map')) {
                          return [...m].map(([k,v]) => [_export(k), _export(v), Helpers.typeToInt(Helpers.getType(k)), Helpers.typeToInt(Helpers.getType(v))]);
-                       } else if (Helpers.is(m, 'object')) {
-                         for (let key of Object.keys(m)) {
-                             m[key] = [_export(m[key]), Helpers.typeToInt(Helpers.getType(m[key]))];
-                         }
-                       } else if (Helpers.is(m, 'array')) {
+                       } else if (Helpers.is(m, 'Array')) {
                          return m.map((value) => { return [_export(value), Helpers.typeToInt(Helpers.getType(value))]; });
+                       } else if (Helpers.is(m, 'Object')) {
+                         for (let key of Object.keys(m)) {
+                             m[key] = convertValueByType(m[key], Helpers.getType(m[key]), _export);
+                         }
                       }
-                      return Helpers.is(m, ['!null', '!number', '!boolean', '!object']) ? m.toString() : m;
+                      return Helpers.is(m, ['!Null', '!Number', '!Boolean', '!Object']) ? m.toString() : m;
                   },
                   exported = _export(Helpers.deepClone(this, MapQL));
 
@@ -341,7 +341,7 @@ class MapQL extends Map {
               promise: false
           }, options);
           try {
-              (Helpers.is(json, 'string') ? JSON.parse(json) : json).map((entry) => {
+              (Helpers.is(json, 'String') ? JSON.parse(json) : json).map((entry) => {
                   this.set(fromType(entry[0], entry[2] || ''), fromType(entry[1], entry[3] || ''));
               });
             } catch (error) {
@@ -356,25 +356,34 @@ class MapQL extends Map {
 }
 
 /*
+ * Convert specific data types to specific values based on type for export().
+ */
+function convertValueByType (value, type, _export) {
+         let typeint = Helpers.typeToInt(type);
+         switch (type) {
+             case 'Date':
+                 return [value.getTime(), typeint];
+             default:
+                 return [_export(value), typeint];
+         }
+};
+
+/*
  * Convert strings to required data type, used in import().
  */
-let Mapper = (value) => {
-    return value.map((val) => {
-        return fromType(val[0], val[1]);
-    });
-};
 function fromType (entry, type) {
          let inttype = Helpers.intToType(type);
          switch (inttype) {
-             case 'Map':
+             case 'Map': case 'MapQL':
                  return (new MapQL()).import(entry); // Convert all 'Map()' entries to MapQL.
              case 'Set':
-                 return new Set(Mapper(entry));
-             // XXX: Function() is a form of eval()!
-             case 'Function':
-                return new Function(`return ${entry};`)();
+                 return new Set(entry.map((val) => {
+                     return fromType(val[0], val[1]);
+                 }));
              case 'Array':
-                return Mapper(entry);
+                 return entry.map((val) => {
+                     return fromType(val[0], val[1]);
+                 });
              case 'Object':
                  return ((obj) => {
                      for (let key of Object.keys(obj)) {
@@ -382,6 +391,9 @@ function fromType (entry, type) {
                      }
                      return obj;
                  })(entry);
+             case 'Function':
+                 // XXX: Function() is a form of eval()!
+                 return new Function(`return ${entry};`)();
              case 'RegExp':
                  return RegExp.apply(null, entry.match(/\/(.*?)\/([gimuy])?$/).slice(1));
              case 'Uint8Array':

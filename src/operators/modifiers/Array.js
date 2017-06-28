@@ -8,7 +8,7 @@ let Helpers = require('../../Helpers');
 module.exports = {
      '$pop': {
          fn: function (key, val, entry) {
-             if (Helpers.is(entry.value, 'object')) {
+             if (Helpers.is(entry.value, 'Object')) {
                 Helpers.dotNotation(key, entry.value, {
                     value: (current) => {
                         if (Array.isArray(current)) {
@@ -17,7 +17,7 @@ module.exports = {
                         return (current !== Helpers._null ? current : []);
                     }
                 });
-              } else if (Helpers.is(entry.value, 'array')) {
+              } else if (Helpers.is(entry.value, 'Array')) {
                 entry.value[(val == -1 ? 'pop' : 'shift')]();
              }
          }
