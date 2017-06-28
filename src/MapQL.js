@@ -382,6 +382,8 @@ function fromType (entry, type) {
                      }
                      return obj;
                  })(entry);
+             case 'RegExp':
+                 return RegExp.apply(null, entry.match(/\/(.*?)\/([gimuy])?$/).slice(1));
              case 'Uint8Array':
              case 'Buffer':
                  try {
@@ -391,8 +393,6 @@ function fromType (entry, type) {
                    } catch (error) {
                      return Buffer.from(entry);
                  }
-             case 'RegExp':
-                 return RegExp.apply(null, entry.match(/\/(.*?)\/([gimuy])?$/).slice(1));
              default: return entry;
          }
 }
