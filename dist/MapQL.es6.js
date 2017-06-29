@@ -1,7 +1,7 @@
 /*!
- * MapQL v0.0.8 - A MongoDB inspired ES6 Map() query langauge. - Copyright (c) 2017 Louis T. (https://lou.ist/)
+ * MapQL v0.0.9 - A MongoDB inspired ES6 Map() query langauge. - Copyright (c) 2017 Louis T. (https://lou.ist/)
  * Licensed under the MIT license - https://raw.githubusercontent.com/LouisT/MapQL/master/LICENSE
- * Updated on 28-06-2017 at 09:06:00
+ * Updated on 29-06-2017 at 03:06:29
  */
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
@@ -2497,7 +2497,7 @@ class Cursor extends Array {
       sort (obj = {}) {
           Object.keys(obj).forEach((key, idx) => {
               Array.prototype.sort.call(this, (a, b) => {
-                  if (!(Helpers.is(a.value, 'object') && Helpers.is(b.value, 'object'))) {
+                  if (!(Helpers.is(a.value, 'Object') && Helpers.is(b.value, 'Object'))) {
                      return 0;
                   }
                   let vals = Helpers.dotNotation(key, [a.value, b.value]);
@@ -2509,7 +2509,7 @@ class Cursor extends Array {
           return this;
       }
       limit (num = 1) {
-          return Helpers.is((this[_limit] = num), 'number') ? this.slice(0, this[_limit]) : this;
+          return Helpers.is((this[_limit] = num), 'Number') ? this.slice(0, this[_limit]) : this;
       }
 }
 module.exports = Cursor;
@@ -2619,7 +2619,7 @@ function dot (keys = [], obj = {}, options = {}) {
              };
 
          try {
-             return _apply(keys, obj, (opts.value ? (is(opts.value, '!function') ? (current, next) => { return next } : opts.value) : opts.value));
+             return _apply(keys, obj, (opts.value ? (is(opts.value, '!Function') ? (current, next) => { return next } : opts.value) : opts.value));
            } catch (e) {
              return undefined; // Value must not exist; return undefined!
          }
@@ -2635,23 +2635,23 @@ function is (val, type, typeOf = false) {
          }
 }
 function deepClone (obj, _Map = Map) {
-         if (is(obj, 'null') || is(obj, '!object', true)) {
+         if (is(obj, 'Null') || is(obj, '!Object', true)) {
             return obj;
          }
-         switch (getType(obj).toLowerCase()) {
-                case 'date':
+         switch (getType(obj)) {
+                case 'Date':
                     return new Date(obj.getTime());
-                case 'map': case 'mapql':
+                case 'Map': case 'MapQL':
                     return new _Map(deepClone(Array.from(obj), _Map));
-                case 'set':
+                case 'Set':
                     return new Set(deepClone(Array.from(obj), _Map));
-                case 'regexp':
+                case 'RegExp':
                     return new RegExp(obj);
-                case 'array':
+                case 'Array':
                     return new Array(obj.length).fill(0).map((val, idx) => {
                         return deepClone(obj[idx], _Map)
                     });
-                case 'object':
+                case 'Object':
                     return ((cloned) => {
                         for (let prop in obj) {
                             if (obj.hasOwnProperty(prop)) {
@@ -2680,7 +2680,7 @@ module.exports = {
 };
 
 },{"./DataTypes":23}],27:[function(require,module,exports){
-(function (Buffer){
+(function (global,Buffer){
 'use strict';
 const queryOperators = require('./operators/Query'),
       logicalOperators = require('./operators/Logical'),
@@ -2689,7 +2689,8 @@ const queryOperators = require('./operators/Query'),
       Cursor = require('./Cursor'),
       Helpers = require('./Helpers'),
       GenerateID = new (require('./GenerateID'))(),
-      isEqual = require('is-equal');
+      isEqual = require('is-equal'),
+      __GLOBAL = new Function("try { return this === global; } catch (e) { return false; }")() ? global : window;
 
 class MapQL extends Map {
       constructor (_map) {
@@ -2724,7 +2725,7 @@ class MapQL extends Map {
           };
           for (let key of Object.keys(queries)) {
               let isLO = this.isLogicalOperator(key);
-              if (Helpers.is(queries[key], 'object')) {
+              if (Helpers.is(queries[key], 'Object')) {
                  for (let mode of Object.keys(queries[key])) {
                      results.list.push([key, mode, queries[key][mode]]);
                  }
@@ -2798,7 +2799,7 @@ class MapQL extends Map {
           });
       }
       find (queries = {}, projections = {}, one = false, bykey = false) {
-          if (Helpers.is(queries, '!object')) {
+          if (Helpers.is(queries, '!Object')) {
              let value;
              if ((value = this.get(queries, false)) !== Helpers._null) {
                 return new Cursor(queries, true).add(new MapQLDocument(queries, value));
@@ -2842,7 +2843,7 @@ class MapQL extends Map {
                   multi: false,
                   projections: {}
               }, options),
-              cursor = this[Helpers.is(queries, 'string') ? 'findByKey' : 'find'](queries, opts.projections, !opts.multi);
+              cursor = this[Helpers.is(queries, 'String') ? 'findByKey' : 'find'](queries, opts.projections, !opts.multi);
           if (!cursor.empty()) {
              let update = this.compile(modifiers, true);
              if (!!update.list.length) {
@@ -2857,7 +2858,7 @@ class MapQL extends Map {
       }
       remove (queries, multi = false) {
           let removed = [];
-          if (Helpers.is(queries, '!object')) {
+          if (Helpers.is(queries, '!Object')) {
              for (let key of (Array.isArray(queries) ? queries : [queries])) {
                  if (this.has(key) && this.delete(key)) {
                     removed.push(key);
@@ -2888,24 +2889,26 @@ class MapQL extends Map {
               pretty: false,
           }, options);
           try {
-              let _export = (m) => {
-                      if (Helpers.is(m, 'set')) {
-                         return [...m].map((k) => [_export(k), Helpers.typeToInt(Helpers.getType(k))]);
-                       } else if (Helpers.is(m, 'map')) {
-                         return [...m].map(([k,v]) => [_export(k), _export(v), Helpers.typeToInt(Helpers.getType(k)), Helpers.typeToInt(Helpers.getType(v))]);
-                       } else if (Helpers.is(m, 'object')) {
-                         for (let key of Object.keys(m)) {
-                             m[key] = [_export(m[key]), Helpers.typeToInt(Helpers.getType(m[key]))];
+              let _export = (value) => {
+                      if (Helpers.is(value, 'Set')) {
+                         return [...value].map((k) => [_export(k), Helpers.typeToInt(Helpers.getType(k))]);
+                       } else if (Helpers.is(value, 'Map')) {
+                         return [...value].map(([k,v]) => [_export(k), _export(v), Helpers.typeToInt(Helpers.getType(k)), Helpers.typeToInt(Helpers.getType(v))]);
+                       } else if (Helpers.is(value, 'Array')) {
+                         return value.map((value) => { return [_export(value), Helpers.typeToInt(Helpers.getType(value))]; });
+                       } else if (Helpers.is(value, 'Object')) {
+                         for (let key of Object.keys(value)) {
+                             value[key] = convertValueByType(value[key], Helpers.getType(value[key]), _export);
                          }
-                       } else if (Helpers.is(m, 'array')) {
-                         return m.map((value) => { return [_export(value), Helpers.typeToInt(Helpers.getType(value))]; });
+                       } else if (isTypedArray(value)) {
+                         return Array.from(value);
                       }
-                      return Helpers.is(m, ['!null', '!number', '!boolean', '!object']) ? m.toString() : m;
+                      return convertValueByType(value, Helpers.getType(value));
                   },
                   exported = _export(Helpers.deepClone(this, MapQL));
 
               return ((res) => {
-                  return (opts.promise ? Promise.resolve(res) : res);
+                  return (opts.provalueise ? Promise.resolve(res) : res);
               })(opts.stringify ? JSON.stringify(exported, null, (opts.pretty ? 4 : 0)) : exported);
             } catch (error) {
               return (opts.promise ? Promise.reject(error) : error);
@@ -2916,7 +2919,7 @@ class MapQL extends Map {
               promise: false
           }, options);
           try {
-              (Helpers.is(json, 'string') ? JSON.parse(json) : json).map((entry) => {
+              (Helpers.is(json, 'String') ? JSON.parse(json) : json).map((entry) => {
                   this.set(fromType(entry[0], entry[2] || ''), fromType(entry[1], entry[3] || ''));
               });
             } catch (error) {
@@ -2929,22 +2932,48 @@ class MapQL extends Map {
           return (opts.promise ? Promise.resolve(this) : this);
       }
 }
-let Mapper = (value) => {
-    return value.map((val) => {
-        return fromType(val[0], val[1]);
-    });
+function isTypedArray (value) {
+         try {
+             if (ArrayBuffer.isView(value) && !(value instanceof DataView)) {
+                return true;
+             }
+         } catch (error) { }
+         return false;
+}
+function convertValueByType (value, type, _export = false) {
+         let _return = ((_exp) => {
+             return (v, t) => {
+                 return _exp ? [_exp(v), t] : v
+             }
+         })(_export);
+
+         let typeint = Helpers.typeToInt(type);
+         switch (type) {
+             case 'Date':
+                 return _return(value.getTime(), typeint);
+             case 'Number':
+                 return _return(isNaN(value) ? value.toString() : Number(value), typeint)
+             default:
+                 if (_export) {
+                    return _return (value, typeint);
+                  } else {
+                    return _return(Helpers.is(value, ['!Null', '!Number', '!Boolean', '!Object']) ? value.toString() : value);
+                 }
+         }
 };
 function fromType (entry, type) {
          let inttype = Helpers.intToType(type);
          switch (inttype) {
-             case 'Map':
+             case 'Map': case 'MapQL':
                  return (new MapQL()).import(entry); // Convert all 'Map()' entries to MapQL.
              case 'Set':
-                 return new Set(Mapper(entry));
-             case 'Function':
-                return new Function(`return ${entry};`)();
+                 return new Set(entry.map((val) => {
+                     return fromType(val[0], val[1]);
+                 }));
              case 'Array':
-                return Mapper(entry);
+                 return entry.map((val) => {
+                     return fromType(val[0], val[1]);
+                 });
              case 'Object':
                  return ((obj) => {
                      for (let key of Object.keys(obj)) {
@@ -2952,6 +2981,12 @@ function fromType (entry, type) {
                      }
                      return obj;
                  })(entry);
+             case 'Function':
+                 return new Function(`return ${entry};`)();
+             case 'RegExp':
+                 return RegExp.apply(null, entry.match(/\/(.*?)\/([gimuy])?$/).slice(1));
+             case 'Date':
+                 return new Date(entry);
              case 'Uint8Array':
              case 'Buffer':
                  try {
@@ -2961,14 +2996,14 @@ function fromType (entry, type) {
                    } catch (error) {
                      return Buffer.from(entry);
                  }
-             case 'RegExp':
-                 return RegExp.apply(null, entry.match(/\/(.*?)\/([gimuy])?$/).slice(1));
-             default: return entry;
+             default:
+                 let _fn = (__GLOBAL[inttype] ? (new Function(`return ${inttype}`))() : (e) => { return e });
+                 try { return _fn(entry); } catch (e) { try { return new _fn(entry); } catch (error) { console.trace(error); } }
          }
 }
 module.exports = MapQL;
 
-}).call(this,require("buffer").Buffer)
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer)
 },{"./Cursor":22,"./Document":24,"./GenerateID":25,"./Helpers":26,"./operators/Logical":28,"./operators/Query":29,"./operators/Update":30,"buffer":3,"is-equal":14}],28:[function(require,module,exports){
 'use strict';
 module.exports = {
@@ -3013,7 +3048,7 @@ let Helpers = require('../../Helpers');
 module.exports = {
      '$pop': {
          fn: function (key, val, entry) {
-             if (Helpers.is(entry.value, 'object')) {
+             if (Helpers.is(entry.value, 'Object')) {
                 Helpers.dotNotation(key, entry.value, {
                     value: (current) => {
                         if (Array.isArray(current)) {
@@ -3022,7 +3057,7 @@ module.exports = {
                         return (current !== Helpers._null ? current : []);
                     }
                 });
-              } else if (Helpers.is(entry.value, 'array')) {
+              } else if (Helpers.is(entry.value, 'Array')) {
                 entry.value[(val == -1 ? 'pop' : 'shift')]();
              }
          }
@@ -3037,7 +3072,7 @@ const isEqual = require('is-equal'),
 module.exports = {
     '$set': {
         fn: function (key, val, entry) {
-            Helpers.is(entry.value, '!object') ? this.set(entry._id, (entry.value = val)) : Helpers.dotNotation(key, entry.value, {
+            Helpers.is(entry.value, '!Object') ? this.set(entry._id, (entry.value = val)) : Helpers.dotNotation(key, entry.value, {
                 value: () => {
                     return val;
                 }
@@ -3047,7 +3082,7 @@ module.exports = {
     '$inc': {
         fn: function (key, val, entry) {
             let _val = parseInt(val, 10);
-            Helpers.is(entry.value, '!object') ? this.set(entry._id, (entry.value = (parseInt(entry.value, 10) + _val))) : Helpers.dotNotation(key, entry.value, {
+            Helpers.is(entry.value, '!Object') ? this.set(entry._id, (entry.value = (parseInt(entry.value, 10) + _val))) : Helpers.dotNotation(key, entry.value, {
                 value: (current) => {
                     return (current !== Helpers._null ? parseInt(current, 10) + _val : _val);
                 }
@@ -3057,7 +3092,7 @@ module.exports = {
     '$mul': {
         fn: function (key, val, entry) {
             let _val = parseInt(val, 10);
-            Helpers.is(entry.value, '!object') ? this.set(entry._id, (entry.value = parseInt(entry.value, 10) * _val)) : Helpers.dotNotation(key, entry.value, {
+            Helpers.is(entry.value, '!Object') ? this.set(entry._id, (entry.value = parseInt(entry.value, 10) * _val)) : Helpers.dotNotation(key, entry.value, {
                 value: (current) => {
                     return (current !== Helpers._null ? parseInt(current, 10) * _val : _val);
                 }
@@ -3066,7 +3101,7 @@ module.exports = {
     },
     '$unset': {
         fn: function (key, val, entry) {
-            Helpers.is(entry.value, '!object') ? this.delete(entry._id, (entry.value = undefined)) : Helpers.dotNotation(key, entry.value, { unset: true });
+            Helpers.is(entry.value, '!Object') ? this.delete(entry._id, (entry.value = undefined)) : Helpers.dotNotation(key, entry.value, { unset: true });
         }
     }
 };
@@ -3156,7 +3191,7 @@ const Helpers = require('../../Helpers');
 module.exports = {
     '$exists': {
         chain: function (key, val) {
-            let isbool = Helpers.is(key, 'boolean'),
+            let isbool = Helpers.is(key, 'Boolean'),
                 check = val !== Helpers._null ? val : (isbool ? key : true);
             return !isbool || val !== Helpers._null ? { [key] : { '$exists': check } } : { '$exists': check };
         },
@@ -3182,12 +3217,12 @@ const Helpers = require('../../Helpers');
 module.exports = {
     '$regex': {
         fn: function (val, regex = /./gi) {
-            return (Helpers.is(regex, 'regexp') ? new RegExp(regex) : new RegExp(regex, 'gi')).test(val);
+            return (Helpers.is(regex, 'RegExp') ? new RegExp(regex) : new RegExp(regex, 'gi')).test(val);
         }
     },
     '$where': {
         fn: function (val, fn = ()=>{}, key, entry) {
-            return Helpers.is(fn, 'function') ? fn.call(Helpers.is(entry[1], 'object') ? entry[1] : {}, entry[1]) : false;
+            return Helpers.is(fn, 'Function') ? fn.call(Helpers.is(entry[1], 'Object') ? entry[1] : {}, entry[1]) : false;
         }
     }
 };

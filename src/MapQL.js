@@ -381,12 +381,6 @@ function convertValueByType (value, type, _export = false) {
              }
          })(_export);
 
-         // Check if buffer view, convert to Array. The type of array is currently
-         // unknown, however import() attempts to correct this.
-         if (isTypedArray(value)) {
-            return _return(Array.from(value), type);
-         }
-
          let typeint = Helpers.typeToInt(type);
          switch (type) {
              case 'Date':
