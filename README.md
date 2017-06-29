@@ -69,20 +69,20 @@ Used with `{Instance}.update(<Query>, <Update>)`.
 
 Import/Export
 -
-Please note that importing and exporting data is highly experimental. This feature currently exports as json,
-so certain keys or references may not be supported. Any input on how to improve import/export of `Map()` would
-be greatly appreciated. Please see #5 for further information.
+Please note that importing and exporting data is highly experimental. This feature currently exports as json, so certain keys or references may not be supported.
+Any input on how to improve import/export of `Map()` would be greatly appreciated. Please see #5 for further information.
 
 Current (known) supported [data types](/src/DataTypes.js):
 * [Primitives]
   * Boolean, Null, Undefined, Number, String, Symbol, Object
 * Extended support
-  * Array, Function, Date, Map, Set, Buffer/Uint8Array, RegExp, NaN
+  * Array, Function, Date, Map, Set, [Buffer]/[Uint8Array], RegExp, NaN
 * Experimental support
   * [TypedArray]
 
-Typed arrays are tested with [ArrayBuffer.isView()], this is an experimental (under tested) feature of MapQL.
-See [TypedArray] for more information about typed arrays.
+[Buffer] and [Uint8Array] are similar enough that browsers will attempt to convert a Buffer into a Uint8Array if the Buffer constructor is unavailable. In the unlikely
+event that nether are available, import() will then attempt to convert it to a normal [Array] with Array.from(). Typed arrays are tested with [ArrayBuffer.isView()],
+this is an experimental (under tested) feature of MapQL. See [TypedArray] for more information about typed arrays.
 
 Example: `MapQL.find()`
 -
@@ -237,5 +237,10 @@ console.log('entries:\n%s', util.inspect([...MapQL.entries()], { depth: null }))
 [Sauce Labs]: https://saucelabs.com/
 [PhantomJS]: http://phantomjs.org/
 [Primitives]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Data_types
+[Buffer]: https://nodejs.org/api/buffer.html
+[Uint8Array]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array
+[Array]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array
+[Array.from]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/from
 [ArrayBuffer.isView()]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer/isView
 [TypedArray]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray
+

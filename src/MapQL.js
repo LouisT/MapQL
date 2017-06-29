@@ -10,9 +10,7 @@ const queryOperators = require('./operators/Query'),
       Cursor = require('./Cursor'),
       Helpers = require('./Helpers'),
       GenerateID = new (require('./GenerateID'))(),
-      isEqual = require('is-equal'),
-      // Choose between global for Node.js or Window for browser, used with import().
-      __GLOBAL = new Function("try { return this === global; } catch (e) { return false; }")() ? global : window;
+      isEqual = require('is-equal');
 
 class MapQL extends Map {
       constructor (_map) {
@@ -360,7 +358,7 @@ class MapQL extends Map {
 }
 
 /*
- * Check if is typed array.
+ * Check if is typed array or Buffer (Uint8Array).
  */
 function isTypedArray (value) {
          try {
@@ -389,9 +387,9 @@ function convertValueByType (value, type, _export = false) {
                  return _return(isNaN(value) ? value.toString() : Number(value), typeint)
              default:
                  if (_export) {
-                    return _return (value, typeint);
+                    return _return(value, typeint);
                   } else {
-                    return _return(Helpers.is(value, ['!Null', '!Number', '!Boolean', '!Object']) ? value.toString() : value);
+                    return _return(Helpers.is(value, ['!Null', '!Boolean', '!Object']) ? value.toString() : value, typeint);
                  }
          }
 };
@@ -427,19 +425,30 @@ function fromType (entry, type) {
              case 'Date':
                  return new Date(entry);
              case 'Uint8Array':
-             case 'Buffer':
                  try {
                      if (Uint8Array && Helpers.getType(Uint8Array) === 'Function') {
                         return new Uint8Array(entry);
                      }
                    } catch (error) {
+                     try {
+                        return Buffer.from(entry);
+                     } catch (error) { return Array.from(entry); }
+                 }
+             case 'Buffer':
+                 try {
                      return Buffer.from(entry);
+                   } catch (error) {
+                     try {
+                         if (Uint8Array && Helpers.getType(Uint8Array) === 'Function') {
+                            return new Uint8Array(entry);
+                         }
+                     } catch (error) { return Array.from(entry); }
                  }
              default:
                  // Execute the function/constructor with the entry value. If type is not a
                  // function or constructor, just return the value. Try without `new`, if
                  // that fails try again with `new`. This attempts to import unknown types.
-                 let _fn = (__GLOBAL[inttype] ? (new Function(`return ${inttype}`))() : (e) => { return e });
+                 let _fn = (Helpers.__GLOBAL[inttype] ? (new Function(`return ${inttype}`))() : (e) => { return e });
                  try { return _fn(entry); } catch (e) { try { return new _fn(entry); } catch (error) { console.trace(error); } }
          }
 }

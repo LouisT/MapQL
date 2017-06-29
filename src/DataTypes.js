@@ -23,7 +23,7 @@ const DataTypes = {
           'Map':         11,
           'Set':         12,
           'Buffer':      13, // Node.js API for Uint8Array()
-          'Uint8Array':  13, // Browser equivalent of Node.js Buffer()
+          'Uint8Array':  14, // Browser equivalent of Node.js Buffer()
       },
       Ints = Object.keys(DataTypes).reduce((obj, key) => Object.assign({}, obj, { [DataTypes[key]]: key }), {});
 

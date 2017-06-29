@@ -5,6 +5,7 @@
 'use strict';
 // Create a null Symbol as 'null' is a valid Map() key/value.
 const _null = Symbol(null),
+      __GLOBAL = new Function("try { return this === global; } catch (e) { return false; }")() ? global : window,
       { typeToInt, intToType } = require('./DataTypes');
 
 /*
@@ -44,6 +45,11 @@ function dot (keys = [], obj = {}, options = {}) {
  * Get the variable type.
  */
 function getType (val) {
+         try {
+            if (__GLOBAL['Buffer'] && Buffer.isBuffer && Buffer.isBuffer(val)) {
+               return 'Buffer';
+            }
+         } catch (error) { }
          return Object.prototype.toString.call(val).match(/(?:\[object (.+)\])/i)[1]
 };
 
@@ -96,6 +102,7 @@ function deepClone (obj, _Map = Map) {
  * Export all of the helper functions.
  */
 module.exports = {
+    __GLOBAL: __GLOBAL,
     _null: _null,
     dotNotation: (keys = _null, obj = {}, options = {}) => {
         // If multiple objects are provided, get each value one via dot notation.
