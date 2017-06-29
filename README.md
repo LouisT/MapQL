@@ -77,7 +77,12 @@ Current (known) supported [data types](/src/DataTypes.js):
 * [Primitives]
   * Boolean, Null, Undefined, Number, String, Symbol, Object
 * Extended support
-  * Array, Function, Date, Map, Set, Buffer/Uint8Array, RegExp
+  * Array, Function, Date, Map, Set, Buffer/Uint8Array, RegExp, NaN
+* Experimental support
+  * [TypedArray]
+
+Typed arrays are tested with [ArrayBuffer.isView()], this is an experimental (under tested) feature of MapQL.
+See [TypedArray] for more information about typed arrays.
 
 Example: `MapQL.find()`
 -
@@ -232,3 +237,5 @@ console.log('entries:\n%s', util.inspect([...MapQL.entries()], { depth: null }))
 [Sauce Labs]: https://saucelabs.com/
 [PhantomJS]: http://phantomjs.org/
 [Primitives]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Data_types
+[ArrayBuffer.isView()]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer/isView
+[TypedArray]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray

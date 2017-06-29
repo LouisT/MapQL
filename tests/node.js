@@ -256,9 +256,11 @@ describe('Delete', () => {
 describe('Import/Export', () => {
     let MapQL2 = new MapQL(),
         MapQL3 = new MapQL(),
+        MapQL4 = new MapQL(),
         data =[
             '[["test0",{"foo":[1,3]},4,6]]',
-            '[[{"foo":[1,3]},"test1",6,4]]'
+            '[[{"foo":[1,3]},"test1",6,4]]',
+            '[["test2",[0,0,0,0],4,"Int32Array"]]'
         ];
     describe('#import()', () => {
         it('it should import '+data[0], () => {
@@ -267,6 +269,9 @@ describe('Import/Export', () => {
         it('it should import '+data[1], () => {
             assert.equal(MapQL3.import(data[1]).findByKey({ foo: 1 })[0].value, 'test1');
         });
+        it('it should import '+data[2], () => {
+            assert.equal(MapQL4.import(data[2]).has('test2'), true);
+        });
     });
     describe('#export()', () => {
         it('it should export '+data[0], () => {
@@ -274,6 +279,9 @@ describe('Import/Export', () => {
         });
         it('it should export '+data[1], () => {
             assert.deepEqual(JSON.parse(MapQL3.export())[0][0], { foo: [1, 3] });
+        });
+        it('it should export '+data[2], () => {
+            assert.deepEqual(JSON.parse(MapQL4.export())[0][0], 'test2');
         });
     });
 });

@@ -13,5 +13,6 @@ require('core-js/es6/object');
 require('core-js/es6/reflect');
 require('core-js/es6/array');
 require('core-js/es6/promise');
+require('core-js/fn/typed/array-buffer');
 
 module.exports = (typeof window !== 'undefined' ? window : {}).MapQL = require('../src/MapQL');

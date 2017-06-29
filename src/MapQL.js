@@ -10,7 +10,9 @@ const queryOperators = require('./operators/Query'),
       Cursor = require('./Cursor'),
       Helpers = require('./Helpers'),
       GenerateID = new (require('./GenerateID'))(),
-      isEqual = require('is-equal');
+      isEqual = require('is-equal'),
+      // Choose between global for Node.js or Window for browser, used with import().
+      __GLOBAL = new Function("try { return this === global; } catch (e) { return false; }")() ? global : window;
 
 class MapQL extends Map {
       constructor (_map) {
@@ -304,24 +306,26 @@ class MapQL extends Map {
               pretty: false,
           }, options);
           try {
-              let _export = (m) => {
-                      if (Helpers.is(m, 'Set')) {
-                         return [...m].map((k) => [_export(k), Helpers.typeToInt(Helpers.getType(k))]);
-                       } else if (Helpers.is(m, 'Map')) {
-                         return [...m].map(([k,v]) => [_export(k), _export(v), Helpers.typeToInt(Helpers.getType(k)), Helpers.typeToInt(Helpers.getType(v))]);
-                       } else if (Helpers.is(m, 'Array')) {
-                         return m.map((value) => { return [_export(value), Helpers.typeToInt(Helpers.getType(value))]; });
-                       } else if (Helpers.is(m, 'Object')) {
-                         for (let key of Object.keys(m)) {
-                             m[key] = convertValueByType(m[key], Helpers.getType(m[key]), _export);
+              let _export = (value) => {
+                      if (Helpers.is(value, 'Set')) {
+                         return [...value].map((k) => [_export(k), Helpers.typeToInt(Helpers.getType(k))]);
+                       } else if (Helpers.is(value, 'Map')) {
+                         return [...value].map(([k,v]) => [_export(k), _export(v), Helpers.typeToInt(Helpers.getType(k)), Helpers.typeToInt(Helpers.getType(v))]);
+                       } else if (Helpers.is(value, 'Array')) {
+                         return value.map((value) => { return [_export(value), Helpers.typeToInt(Helpers.getType(value))]; });
+                       } else if (Helpers.is(value, 'Object')) {
+                         for (let key of Object.keys(value)) {
+                             value[key] = convertValueByType(value[key], Helpers.getType(value[key]), _export);
                          }
+                       } else if (isTypedArray(value)) {
+                         return Array.from(value);
                       }
-                      return Helpers.is(m, ['!Null', '!Number', '!Boolean', '!Object']) ? m.toString() : m;
+                      return convertValueByType(value, Helpers.getType(value));
                   },
                   exported = _export(Helpers.deepClone(this, MapQL));
 
               return ((res) => {
-                  return (opts.promise ? Promise.resolve(res) : res);
+                  return (opts.provalueise ? Promise.resolve(res) : res);
               })(opts.stringify ? JSON.stringify(exported, null, (opts.pretty ? 4 : 0)) : exported);
             } catch (error) {
               return (opts.promise ? Promise.reject(error) : error);
@@ -356,15 +360,45 @@ class MapQL extends Map {
 }
 
 /*
+ * Check if is typed array.
+ */
+function isTypedArray (value) {
+         try {
+             if (ArrayBuffer.isView(value) && !(value instanceof DataView)) {
+                return true;
+             }
+         } catch (error) { }
+         return false;
+}
+
+/*
  * Convert specific data types to specific values based on type for export().
  */
-function convertValueByType (value, type, _export) {
+function convertValueByType (value, type, _export = false) {
+         let _return = ((_exp) => {
+             return (v, t) => {
+                 return _exp ? [_exp(v), t] : v
+             }
+         })(_export);
+
+         // Check if buffer view, convert to Array. The type of array is currently
+         // unknown, however import() attempts to correct this.
+         if (isTypedArray(value)) {
+            return _return(Array.from(value), type);
+         }
+
          let typeint = Helpers.typeToInt(type);
          switch (type) {
              case 'Date':
-                 return [value.getTime(), typeint];
+                 return _return(value.getTime(), typeint);
+             case 'Number':
+                 return _return(isNaN(value) ? value.toString() : Number(value), typeint)
              default:
-                 return [_export(value), typeint];
+                 if (_export) {
+                    return _return (value, typeint);
+                  } else {
+                    return _return(Helpers.is(value, ['!Null', '!Number', '!Boolean', '!Object']) ? value.toString() : value);
+                 }
          }
 };
 
@@ -396,6 +430,8 @@ function fromType (entry, type) {
                  return new Function(`return ${entry};`)();
              case 'RegExp':
                  return RegExp.apply(null, entry.match(/\/(.*?)\/([gimuy])?$/).slice(1));
+             case 'Date':
+                 return new Date(entry);
              case 'Uint8Array':
              case 'Buffer':
                  try {
@@ -405,7 +441,12 @@ function fromType (entry, type) {
                    } catch (error) {
                      return Buffer.from(entry);
                  }
-             default: return entry;
+             default:
+                 // Execute the function/constructor with the entry value. If type is not a
+                 // function or constructor, just return the value. Try without `new`, if
+                 // that fails try again with `new`. This attempts to import unknown types.
+                 let _fn = (__GLOBAL[inttype] ? (new Function(`return ${inttype}`))() : (e) => { return e });
+                 try { return _fn(entry); } catch (e) { try { return new _fn(entry); } catch (error) { console.trace(error); } }
          }
 }
 
