@@ -39,6 +39,13 @@ class Document {
       get isDocument () {
           return this.constructor.isDocument(this);
       }
+
+      /*
+       * Allow the class to have a custom object string tag.
+       */
+      get [Symbol.toStringTag]() {
+          return (this.constructor.name || 'Document');
+      }
 }
 
 /*

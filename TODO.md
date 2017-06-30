@@ -12,7 +12,7 @@ TODO
 * While the "[is-equal]" lib does what I want, it's a bit big. Find a smaller solution!?
 * Document the chainable features.
   * Clean up the 'ChainManager' class in `./lib/` as well.
-* Document 'Cursor' and 'QueryResult'.
+* Document 'Cursor' and 'Document'.
 * Document dot notation queries for object queries.
     * Example: MapQL.find({ 'foo.bar.baz': { '$gt': 10 } });
 * Document 'findAsync'.

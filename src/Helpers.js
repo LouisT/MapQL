@@ -75,7 +75,7 @@ function deepClone (obj, _Map = Map) {
          switch (getType(obj)) {
                 case 'Date':
                     return new Date(obj.getTime());
-                case 'Map': case 'MapQL':
+                case 'MapQL': case 'Map':
                     return new _Map(deepClone(Array.from(obj), _Map));
                 case 'Set':
                     return new Set(deepClone(Array.from(obj), _Map));

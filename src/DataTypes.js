@@ -21,9 +21,10 @@ const DataTypes = {
           'Date':        9,
           'RegExp':      10,
           'Map':         11,
-          'Set':         12,
-          'Buffer':      13, // Node.js API for Uint8Array()
-          'Uint8Array':  14, // Browser equivalent of Node.js Buffer()
+          'MapQL':       12,
+          'Set':         13,
+          'Buffer':      14, // Node.js API for Uint8Array()
+          'Uint8Array':  15, // Browser equivalent of Node.js Buffer()
       },
       Ints = Object.keys(DataTypes).reduce((obj, key) => Object.assign({}, obj, { [DataTypes[key]]: key }), {});
 

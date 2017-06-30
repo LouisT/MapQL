@@ -307,7 +307,7 @@ class MapQL extends Map {
               let _export = (value) => {
                       if (Helpers.is(value, 'Set')) {
                          return [...value].map((k) => [_export(k), Helpers.typeToInt(Helpers.getType(k))]);
-                       } else if (Helpers.is(value, 'Map')) {
+                       } else if (Helpers.is(value, ['MapQL', 'Map'], false, true)) {
                          return [...value].map(([k,v]) => [_export(k), _export(v), Helpers.typeToInt(Helpers.getType(k)), Helpers.typeToInt(Helpers.getType(v))]);
                        } else if (Helpers.is(value, 'Array')) {
                          return value.map((value) => { return [_export(value), Helpers.typeToInt(Helpers.getType(value))]; });
@@ -355,6 +355,14 @@ class MapQL extends Map {
           }
           return (opts.promise ? Promise.resolve(this) : this);
       }
+
+
+      /*
+       * Allow the class to have a custom object string tag.
+       */
+      get [Symbol.toStringTag]() {
+          return (this.constructor.name || 'MapQL');
+      }
 }
 
 /*
@@ -385,6 +393,8 @@ function convertValueByType (value, type, _export = false) {
                  return _return(value.getTime(), typeint);
              case 'Number':
                  return _return(isNaN(value) ? value.toString() : Number(value), typeint)
+             case 'Symbol':
+                 return  _return(String(value).slice(7, -1), typeint);
              default:
                  if (_export) {
                     return _return(value, typeint);
@@ -400,7 +410,7 @@ function convertValueByType (value, type, _export = false) {
 function fromType (entry, type) {
          let inttype = Helpers.intToType(type);
          switch (inttype) {
-             case 'Map': case 'MapQL':
+             case 'MapQL': case 'Map':
                  return (new MapQL()).import(entry); // Convert all 'Map()' entries to MapQL.
              case 'Set':
                  return new Set(entry.map((val) => {

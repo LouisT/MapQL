@@ -61,6 +61,13 @@ class Cursor extends Array {
       limit (num = 1) {
           return Helpers.is((this[_limit] = num), 'Number') ? this.slice(0, this[_limit]) : this;
       }
+
+      /*
+       * Allow the class to have a custom object string tag.
+       */
+      get [Symbol.toStringTag]() {
+          return (this.constructor.name || 'Cursor');
+      }
 }
 
 /*

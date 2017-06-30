@@ -29,6 +29,13 @@ class GenerateID {
       next () {
           return this.gen().next().value;
       }
+
+      /*
+       * Allow the class to have a custom object string tag.
+       */
+      get [Symbol.toStringTag]() {
+          return (this.constructor.name || 'GenerateID');
+      }
 }
 
 /*
