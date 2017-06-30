@@ -36,6 +36,7 @@ class MapQL extends Map {
           }
           return Map.prototype.has.call(this, key);
       }
+
       /*
        * Get a key if it exists, if strict is false return value if the
        * keys are only similar.
@@ -51,7 +52,6 @@ class MapQL extends Map {
           }
           return Map.prototype.get.call(this, key);
       }
-
 
       /*
        * Convert the query/update object to an Object with an Array
@@ -436,12 +436,10 @@ function fromType (entry, type) {
                  return new Date(entry);
              case 'Uint8Array':
                  try {
-                     if (Uint8Array && Helpers.getType(Uint8Array) === 'Function') {
-                        return new Uint8Array(entry);
-                     }
+                     return new Uint8Array(entry);
                    } catch (error) {
                      try {
-                        return Buffer.from(entry);
+                         return Buffer.from(entry);
                      } catch (error) { return Array.from(entry); }
                  }
              case 'Buffer':
@@ -449,9 +447,7 @@ function fromType (entry, type) {
                      return Buffer.from(entry);
                    } catch (error) {
                      try {
-                         if (Uint8Array && Helpers.getType(Uint8Array) === 'Function') {
-                            return new Uint8Array(entry);
-                         }
+                         return new Uint8Array(entry);
                      } catch (error) { return Array.from(entry); }
                  }
              default:
