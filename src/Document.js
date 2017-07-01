@@ -41,6 +41,14 @@ class Document {
       }
 
       /*
+       * Mark if this Document was added by the key.
+       * Note: This is just extra metadata; not actively used anywhere.
+       */
+      bykey (value = false) {
+          return (this[Symbol.for('bykey')] = value) === value ? this : false;
+      }
+
+      /*
        * Allow the class to have a custom object string tag.
        */
       get [Symbol.toStringTag]() {

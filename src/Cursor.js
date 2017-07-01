@@ -8,9 +8,8 @@ const Helpers = require('./Helpers'),
       _limit = Symbol('_limit');
 
 class Cursor extends Array {
-      constructor (query = Helpers._null, bykey = false) {
+      constructor (query = Helpers._null) {
           super();
-          this[_query] = Object.assign({ bykey: bykey }, { query: query });
           this[_limit] = false;
       }
 
@@ -22,12 +21,28 @@ class Cursor extends Array {
       }
 
       /*
-       * If `result` is a valid Document object, add it to the cursor.
+       * Set the query used to generate this Cursor.
        */
-      add (result = []) {
-          return Array.prototype.push.apply(this, (Array.isArray(result) ? result : [result]).filter((res) => {
-              return res.isDocument;
-          })) >= 1 ? this : false;
+      set query (value) {
+          this[_query] = Object.assign({ }, value);
+      }
+
+      /*
+       * Check if the Cursor already has a Document.
+       */
+      has (doc) {
+          return !(this.indexOf(doc) <= -1);
+      }
+
+      /*
+       * If `docs` is a valid Document object, add it to the Cursor if it doesn't already exist.
+       */
+      add (docs = []) {
+          Array.prototype.push.apply(this, (Array.isArray(docs) ? docs : [docs]).filter((doc) => {
+              return doc.isDocument && !this.has(doc);
+          }));
+
+          return this;
       }
 
       /*

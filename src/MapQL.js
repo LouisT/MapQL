@@ -183,19 +183,23 @@ class MapQL extends Map {
        * Check all entries against every provided query selector.
        */
       find (queries = {}, projections = {}, one = false, bykey = false) {
+          let cursor = new Cursor();
           if (Helpers.is(queries, '!Object')) {
              let value;
              if ((value = this.get(queries, false)) !== Helpers._null) {
-                return new Cursor(queries, true).add(new MapQLDocument(queries, value));
+                cursor.add(new MapQLDocument(queries, value).bykey(true));
+                if (one) {
+                   return cursor;
+                }
              }
              queries = { '$eq' : queries };
           }
+          cursor.query = queries;
           let _queries = this.compile(queries);
           if (!!_queries.list.length) {
-             let cursor = new Cursor(queries, bykey);
              for (let entry of this.entries()) {
                  if (this._validate(!bykey ? entry : [entry[0], entry[0]], _queries)) {
-                    cursor.add(new MapQLDocument(entry[0], entry[1], bykey));
+                    cursor.add(new MapQLDocument(entry[0], entry[1]).bykey(bykey));
                     if (one) {
                        return cursor;
                     }
