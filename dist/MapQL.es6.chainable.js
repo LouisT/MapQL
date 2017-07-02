@@ -1,7 +1,7 @@
 /*!
- * MapQL v0.0.9 - A MongoDB inspired ES6 Map() query langauge. - Copyright (c) 2017 Louis T. (https://lou.ist/)
+ * MapQL v0.0.10 - A MongoDB inspired ES6 Map() query langauge. - Copyright (c) 2017 Louis T. (https://lou.ist/)
  * Licensed under the MIT license - https://raw.githubusercontent.com/LouisT/MapQL/master/LICENSE
- * Updated on 29-06-2017 at 03:06:29
+ * Updated on 02-07-2017 at 01:07:23
  */
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
@@ -14,11 +14,11 @@ MapQL.prototype.chain = function () {
 module.exports = (typeof window !== 'undefined' ? window : {}).MapQL = MapQL;
 
 
-},{"../":2,"../src/ChainManager":23}],2:[function(require,module,exports){
+},{"../":2,"../src/ChainManager":24}],2:[function(require,module,exports){
 'use strict';
 module.exports = (typeof window !== 'undefined' ? window : {}).MapQL = require('./src/MapQL');
 
-},{"./src/MapQL":29}],3:[function(require,module,exports){
+},{"./src/MapQL":30}],3:[function(require,module,exports){
 'use strict'
 
 exports.byteLength = byteLength
@@ -1732,7 +1732,7 @@ function isnan (val) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"base64-js":3,"ieee754":8,"isarray":22}],5:[function(require,module,exports){
+},{"base64-js":3,"ieee754":8,"isarray":23}],5:[function(require,module,exports){
 var ERROR_MESSAGE = 'Function.prototype.bind called on incompatible ';
 var slice = Array.prototype.slice;
 var toStr = Object.prototype.toString;
@@ -1895,7 +1895,7 @@ module.exports = function isArrowFunction(fn) {
 		(isArrowFnWithParensRegex.test(fnStr) || isArrowFnWithoutParensRegex.test(fnStr));
 };
 
-},{"is-callable":11}],10:[function(require,module,exports){
+},{"is-callable":12}],10:[function(require,module,exports){
 'use strict';
 
 var boolToStr = Boolean.prototype.toString;
@@ -1919,6 +1919,18 @@ module.exports = function isBoolean(value) {
 };
 
 },{}],11:[function(require,module,exports){
+module.exports = function (obj) {
+  return obj != null && (isBuffer(obj) || isSlowBuffer(obj) || !!obj._isBuffer)
+}
+
+function isBuffer (obj) {
+  return !!obj.constructor && typeof obj.constructor.isBuffer === 'function' && obj.constructor.isBuffer(obj)
+}
+function isSlowBuffer (obj) {
+  return typeof obj.readFloatLE === 'function' && typeof obj.slice === 'function' && isBuffer(obj.slice(0, 0))
+}
+
+},{}],12:[function(require,module,exports){
 'use strict';
 
 var fnToStr = Function.prototype.toString;
@@ -1959,7 +1971,7 @@ module.exports = function isCallable(value) {
 	return strClass === fnClass || strClass === genClass;
 };
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 'use strict';
 
 var getDay = Date.prototype.getDay;
@@ -1981,7 +1993,7 @@ module.exports = function isDateObject(value) {
 	return hasToStringTag ? tryDateObject(value) : toStr.call(value) === dateClass;
 };
 
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 'use strict';
 
 module.exports = function () {
@@ -2008,7 +2020,7 @@ module.exports = function () {
 	return { Map: mapForEach, Set: setForEach };
 };
 
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 'use strict';
 
 var isSymbol = require('is-symbol');
@@ -2027,7 +2039,7 @@ module.exports = function getSymbolIterator() {
 	return symbolIterator;
 };
 
-},{"is-symbol":21}],15:[function(require,module,exports){
+},{"is-symbol":22}],16:[function(require,module,exports){
 'use strict';
 
 var whyNotEqual = require('./why');
@@ -2036,7 +2048,7 @@ module.exports = function isEqual(value, other) {
 	return whyNotEqual(value, other) === '';
 };
 
-},{"./why":16}],16:[function(require,module,exports){
+},{"./why":17}],17:[function(require,module,exports){
 'use strict';
 
 var ObjectPrototype = Object.prototype;
@@ -2328,7 +2340,7 @@ module.exports = function whyNotEqual(value, other) {
 	return false;
 };
 
-},{"./getCollectionsForEach":13,"./getSymbolIterator":14,"has":7,"is-arrow-function":9,"is-boolean-object":10,"is-callable":11,"is-date-object":12,"is-generator-function":17,"is-number-object":18,"is-regex":19,"is-string":20,"is-symbol":21}],17:[function(require,module,exports){
+},{"./getCollectionsForEach":14,"./getSymbolIterator":15,"has":7,"is-arrow-function":9,"is-boolean-object":10,"is-callable":12,"is-date-object":13,"is-generator-function":18,"is-number-object":19,"is-regex":20,"is-string":21,"is-symbol":22}],18:[function(require,module,exports){
 'use strict';
 
 var toStr = Object.prototype.toString;
@@ -2362,7 +2374,7 @@ module.exports = function isGeneratorFunction(fn) {
 	return getProto(fn) === GeneratorFunction;
 };
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 'use strict';
 
 var numToStr = Number.prototype.toString;
@@ -2384,7 +2396,7 @@ module.exports = function isNumberObject(value) {
 	return hasToStringTag ? tryNumberObject(value) : toStr.call(value) === numClass;
 };
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 'use strict';
 
 var has = require('has');
@@ -2425,7 +2437,7 @@ module.exports = function isRegex(value) {
 	return tryRegexExecCall(value);
 };
 
-},{"has":7}],20:[function(require,module,exports){
+},{"has":7}],21:[function(require,module,exports){
 'use strict';
 
 var strValue = String.prototype.valueOf;
@@ -2447,7 +2459,7 @@ module.exports = function isString(value) {
 	return hasToStringTag ? tryStringObject(value) : toStr.call(value) === strClass;
 };
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 'use strict';
 
 var toStr = Object.prototype.toString;
@@ -2475,14 +2487,14 @@ if (hasSymbols) {
 	};
 }
 
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 var toString = {}.toString;
 
 module.exports = Array.isArray || function (arr) {
   return toString.call(arr) == '[object Array]';
 };
 
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 'use strict';
 const Helpers = require('./Helpers');
 
@@ -2533,50 +2545,49 @@ class ChainManager {
 }
 module.exports = ChainManager;
 
-},{"./Helpers":28}],24:[function(require,module,exports){
+},{"./Helpers":29}],25:[function(require,module,exports){
 'use strict';
-const Helpers = require('./Helpers'),
-      _query = Symbol('_query'),
-      _limit = Symbol('_limit');
+const Helpers = require('./Helpers');
 
 class Cursor extends Array {
-      constructor (query = Helpers._null, bykey = false) {
+      constructor () {
           super();
-          this[_query] = Object.assign({ bykey: bykey }, { query: query });
-          this[_limit] = false;
       }
-      get query () {
-          return this[_query] ? this[_query] : Helpers._null;
+      has (doc) {
+          return !(this.indexOf(doc) <= -1);
       }
-      add (result = []) {
-          return Array.prototype.push.apply(this, (Array.isArray(result) ? result : [result]).filter((res) => {
-              return res.isDocument;
-          })) >= 1 ? this : false;
+      add (docs = []) {
+          Array.prototype.push.apply(this, (Array.isArray(docs) ? docs : [docs]).filter((doc) => {
+              return doc.isDocument && !this.has(doc);
+          }));
+
+          return this;
       }
       empty () {
           return !(this.length >= 1);
       }
-      sort (obj = {}) {
+      sort (sort = {}) {
+          let obj = Helpers.is(sort, 'Object') ? sort : { default: sort };
           Object.keys(obj).forEach((key, idx) => {
               Array.prototype.sort.call(this, (a, b) => {
-                  if (!(Helpers.is(a.value, 'Object') && Helpers.is(b.value, 'Object'))) {
-                     return 0;
-                  }
-                  let vals = Helpers.dotNotation(key, [a.value, b.value]);
+                  let vals = (Helpers.is(a.value, 'Object') && Helpers.is(b.value, 'Object')) ? Helpers.dotNotation(key, [a.value, b.value]) : [a, b];
                   return (vals[0] < vals[1]) ? -1 : ((vals[0] > vals[1]) ? 1 : 0);
                })[obj[key] === -1 ? 'reverse' : 'valueOf']().forEach((val, idx2) => {
-                  this[idx2] = val;
+                  return this[idx2] = val;
               });
           });
           return this;
       }
-      limit (num = 1) {
-          return Helpers.is((this[_limit] = num), 'Number') ? this.slice(0, this[_limit]) : this;
+      limit (num = false) {
+          return Helpers.is(num, 'Number') ? this.slice(0, num) : this;
+      }
+      get [Symbol.toStringTag]() {
+          return (this.constructor.name || 'Cursor');
       }
 }
 module.exports = Cursor;
 
-},{"./Helpers":28}],25:[function(require,module,exports){
+},{"./Helpers":29}],26:[function(require,module,exports){
 'use strict';
 const DataTypes = {
           'Boolean':     0,
@@ -2591,9 +2602,10 @@ const DataTypes = {
           'Date':        9,
           'RegExp':      10,
           'Map':         11,
-          'Set':         12,
-          'Buffer':      13, // Node.js API for Uint8Array()
-          'Uint8Array':  13, // Browser equivalent of Node.js Buffer()
+          'MapQL':       12,
+          'Set':         13,
+          'Buffer':      14, // Node.js API for Uint8Array()
+          'Uint8Array':  15, // Browser equivalent of Node.js Buffer()
       },
       Ints = Object.keys(DataTypes).reduce((obj, key) => Object.assign({}, obj, { [DataTypes[key]]: key }), {});
 
@@ -2610,7 +2622,7 @@ module.exports = {
     }
 };
 
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 'use strict';
 const Helpers = require('./Helpers');
 
@@ -2636,10 +2648,16 @@ class Document {
       get isDocument () {
           return this.constructor.isDocument(this);
       }
+      bykey (value = false) {
+          return (this[Symbol.for('bykey')] = value) === value ? this : false;
+      }
+      get [Symbol.toStringTag]() {
+          return (this.constructor.name || 'Document');
+      }
 }
 module.exports = Document;
 
-},{"./Helpers":28}],27:[function(require,module,exports){
+},{"./Helpers":29}],28:[function(require,module,exports){
 'use strict';
 const _index = Symbol('_index'),
       _prefix = Symbol('_prefix');
@@ -2655,12 +2673,17 @@ class GenerateID {
       next () {
           return this.gen().next().value;
       }
+      get [Symbol.toStringTag]() {
+          return (this.constructor.name || 'GenerateID');
+      }
 }
 module.exports = GenerateID;
 
-},{}],28:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
+(function (Buffer,global){
 'use strict';
 const _null = Symbol(null),
+      __GLOBAL = new Function("try { return this === global; } catch (e) { return false; }")() ? global : window,
       { typeToInt, intToType } = require('./DataTypes');
 function dot (keys = [], obj = {}, options = {}) {
          let opts = Object.assign({
@@ -2687,6 +2710,11 @@ function dot (keys = [], obj = {}, options = {}) {
          }
 }
 function getType (val) {
+         try {
+            if (__GLOBAL['Buffer'] && Buffer.isBuffer && Buffer.isBuffer(val)) {
+               return 'Buffer';
+            }
+         } catch (error) { }
          return Object.prototype.toString.call(val).match(/(?:\[object (.+)\])/i)[1]
 };
 function is (val, type, typeOf = false) {
@@ -2703,7 +2731,7 @@ function deepClone (obj, _Map = Map) {
          switch (getType(obj)) {
                 case 'Date':
                     return new Date(obj.getTime());
-                case 'Map': case 'MapQL':
+                case 'MapQL': case 'Map':
                     return new _Map(deepClone(Array.from(obj), _Map));
                 case 'Set':
                     return new Set(deepClone(Array.from(obj), _Map));
@@ -2726,6 +2754,7 @@ function deepClone (obj, _Map = Map) {
          }
 }
 module.exports = {
+    __GLOBAL: __GLOBAL,
     _null: _null,
     dotNotation: (keys = _null, obj = {}, options = {}) => {
         return Array.isArray(obj) ? obj.map((_obj, idx) => {
@@ -2741,8 +2770,9 @@ module.exports = {
     intToType: intToType
 };
 
-},{"./DataTypes":25}],29:[function(require,module,exports){
-(function (global,Buffer){
+}).call(this,{"isBuffer":require("../node_modules/is-buffer/index.js")},typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"../node_modules/is-buffer/index.js":11,"./DataTypes":26}],30:[function(require,module,exports){
+(function (Buffer){
 'use strict';
 const queryOperators = require('./operators/Query'),
       logicalOperators = require('./operators/Logical'),
@@ -2751,8 +2781,7 @@ const queryOperators = require('./operators/Query'),
       Cursor = require('./Cursor'),
       Helpers = require('./Helpers'),
       GenerateID = new (require('./GenerateID'))(),
-      isEqual = require('is-equal'),
-      __GLOBAL = new Function("try { return this === global; } catch (e) { return false; }")() ? global : window;
+      isEqual = require('is-equal');
 
 class MapQL extends Map {
       constructor (_map) {
@@ -2861,19 +2890,22 @@ class MapQL extends Map {
           });
       }
       find (queries = {}, projections = {}, one = false, bykey = false) {
+          let cursor = new Cursor();
           if (Helpers.is(queries, '!Object')) {
              let value;
              if ((value = this.get(queries, false)) !== Helpers._null) {
-                return new Cursor(queries, true).add(new MapQLDocument(queries, value));
+                cursor.add(new MapQLDocument(queries, value).bykey(true));
+                if (one || bykey) {
+                   return cursor;
+                }
              }
              queries = { '$eq' : queries };
           }
           let _queries = this.compile(queries);
           if (!!_queries.list.length) {
-             let cursor = new Cursor(queries, bykey);
              for (let entry of this.entries()) {
                  if (this._validate(!bykey ? entry : [entry[0], entry[0]], _queries)) {
-                    cursor.add(new MapQLDocument(entry[0], entry[1], bykey));
+                    cursor.add(new MapQLDocument(entry[0], entry[1]).bykey(bykey));
                     if (one) {
                        return cursor;
                     }
@@ -2890,7 +2922,7 @@ class MapQL extends Map {
       findByKey (queries = {}, projections = {}, one = false) {
           return this.find(queries, projections, one, true);
       }
-      findAsync (queries = {}, projections = {}, one = false) {
+      findPromise (queries = {}, projections = {}, one = false) {
           return new Promise((resolve, reject) => {
               try {
                   let results = this.find(queries, projections, one);
@@ -2954,7 +2986,7 @@ class MapQL extends Map {
               let _export = (value) => {
                       if (Helpers.is(value, 'Set')) {
                          return [...value].map((k) => [_export(k), Helpers.typeToInt(Helpers.getType(k))]);
-                       } else if (Helpers.is(value, 'Map')) {
+                       } else if (Helpers.is(value, ['MapQL', 'Map'], false, true)) {
                          return [...value].map(([k,v]) => [_export(k), _export(v), Helpers.typeToInt(Helpers.getType(k)), Helpers.typeToInt(Helpers.getType(v))]);
                        } else if (Helpers.is(value, 'Array')) {
                          return value.map((value) => { return [_export(value), Helpers.typeToInt(Helpers.getType(value))]; });
@@ -2993,6 +3025,9 @@ class MapQL extends Map {
           }
           return (opts.promise ? Promise.resolve(this) : this);
       }
+      get [Symbol.toStringTag]() {
+          return (this.constructor.name || 'MapQL');
+      }
 }
 function isTypedArray (value) {
          try {
@@ -3015,18 +3050,20 @@ function convertValueByType (value, type, _export = false) {
                  return _return(value.getTime(), typeint);
              case 'Number':
                  return _return(isNaN(value) ? value.toString() : Number(value), typeint)
+             case 'Symbol':
+                 return  _return(String(value).slice(7, -1), typeint);
              default:
                  if (_export) {
-                    return _return (value, typeint);
+                    return _return(value, typeint);
                   } else {
-                    return _return(Helpers.is(value, ['!Null', '!Number', '!Boolean', '!Object']) ? value.toString() : value);
+                    return _return(Helpers.is(value, ['!Null', '!Boolean', '!Object']) ? value.toString() : value, typeint);
                  }
          }
 };
 function fromType (entry, type) {
          let inttype = Helpers.intToType(type);
          switch (inttype) {
-             case 'Map': case 'MapQL':
+             case 'MapQL': case 'Map':
                  return (new MapQL()).import(entry); // Convert all 'Map()' entries to MapQL.
              case 'Set':
                  return new Set(entry.map((val) => {
@@ -3050,23 +3087,30 @@ function fromType (entry, type) {
              case 'Date':
                  return new Date(entry);
              case 'Uint8Array':
+                 try {
+                     return new Uint8Array(entry);
+                   } catch (error) {
+                     try {
+                         return Buffer.from(entry);
+                     } catch (error) { return Array.from(entry); }
+                 }
              case 'Buffer':
                  try {
-                     if (Uint8Array && Helpers.getType(Uint8Array) === 'Function') {
-                        return new Uint8Array(entry);
-                     }
-                   } catch (error) {
                      return Buffer.from(entry);
+                   } catch (error) {
+                     try {
+                         return new Uint8Array(entry);
+                     } catch (error) { return Array.from(entry); }
                  }
              default:
-                 let _fn = (__GLOBAL[inttype] ? (new Function(`return ${inttype}`))() : (e) => { return e });
+                 let _fn = (Helpers.__GLOBAL[inttype] ? (new Function(`return ${inttype}`))() : (e) => { return e });
                  try { return _fn(entry); } catch (e) { try { return new _fn(entry); } catch (error) { console.trace(error); } }
          }
 }
 module.exports = MapQL;
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer)
-},{"./Cursor":24,"./Document":26,"./GenerateID":27,"./Helpers":28,"./operators/Logical":30,"./operators/Query":31,"./operators/Update":32,"buffer":4,"is-equal":15}],30:[function(require,module,exports){
+}).call(this,require("buffer").Buffer)
+},{"./Cursor":25,"./Document":27,"./GenerateID":28,"./Helpers":29,"./operators/Logical":31,"./operators/Query":32,"./operators/Update":33,"buffer":4,"is-equal":16}],31:[function(require,module,exports){
 'use strict';
 module.exports = {
     '$or': {
@@ -3077,7 +3121,7 @@ module.exports = {
     }
 };
 
-},{}],31:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 'use strict';
 const _Comparison = require('./selectors/Comparison'),
       _Element = require('./selectors/Element'),
@@ -3091,7 +3135,7 @@ module.exports = Object.assign({
     }
 }, _Comparison, _Element, _Evaluation, _Array);
 
-},{"./selectors/Array":35,"./selectors/Comparison":36,"./selectors/Element":37,"./selectors/Evaluation":38}],32:[function(require,module,exports){
+},{"./selectors/Array":36,"./selectors/Comparison":37,"./selectors/Element":38,"./selectors/Evaluation":39}],33:[function(require,module,exports){
 'use strict';
 const _Array = require('./modifiers/Array'),
       _Field = require('./modifiers/Field');
@@ -3103,7 +3147,7 @@ module.exports = Object.assign({
     }
 }, _Array, _Field);
 
-},{"./modifiers/Array":33,"./modifiers/Field":34}],33:[function(require,module,exports){
+},{"./modifiers/Array":34,"./modifiers/Field":35}],34:[function(require,module,exports){
 'use strict';
 let Helpers = require('../../Helpers');
 
@@ -3126,7 +3170,7 @@ module.exports = {
      }
 };
 
-},{"../../Helpers":28}],34:[function(require,module,exports){
+},{"../../Helpers":29}],35:[function(require,module,exports){
 'use strict';
 const isEqual = require('is-equal'),
       Helpers = require('../../Helpers');
@@ -3168,7 +3212,7 @@ module.exports = {
     }
 };
 
-},{"../../Helpers":28,"is-equal":15}],35:[function(require,module,exports){
+},{"../../Helpers":29,"is-equal":16}],36:[function(require,module,exports){
 'use strict';
 module.exports = {
     '$size': {
@@ -3178,7 +3222,7 @@ module.exports = {
     }
 };
 
-},{}],36:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 'use strict';
 const isEqual = require('is-equal'),
       Helpers = require('../../Helpers');
@@ -3246,7 +3290,7 @@ module.exports = {
     }
 };
 
-},{"../../Helpers":28,"is-equal":15}],37:[function(require,module,exports){
+},{"../../Helpers":29,"is-equal":16}],38:[function(require,module,exports){
 'use strict';
 const Helpers = require('../../Helpers');
 
@@ -3272,7 +3316,7 @@ module.exports = {
     }
 };
 
-},{"../../Helpers":28}],38:[function(require,module,exports){
+},{"../../Helpers":29}],39:[function(require,module,exports){
 'use strict';
 const Helpers = require('../../Helpers');
 
@@ -3289,4 +3333,4 @@ module.exports = {
     }
 };
 
-},{"../../Helpers":28}]},{},[1]);
+},{"../../Helpers":29}]},{},[1]);
