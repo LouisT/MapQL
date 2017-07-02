@@ -188,7 +188,7 @@ class MapQL extends Map {
              let value;
              if ((value = this.get(queries, false)) !== Helpers._null) {
                 cursor.add(new MapQLDocument(queries, value).bykey(true));
-                if (one) {
+                if (one || bykey) {
                    return cursor;
                 }
              }
