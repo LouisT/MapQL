@@ -194,7 +194,6 @@ class MapQL extends Map {
              }
              queries = { '$eq' : queries };
           }
-          cursor.query = queries;
           let _queries = this.compile(queries);
           if (!!_queries.list.length) {
              for (let entry of this.entries()) {
@@ -228,7 +227,7 @@ class MapQL extends Map {
       /*
        * Check all entries against every provided query selector; Promise based.
        */
-      findAsync (queries = {}, projections = {}, one = false) {
+      findPromise (queries = {}, projections = {}, one = false) {
           return new Promise((resolve, reject) => {
               try {
                   let results = this.find(queries, projections, one);

@@ -43,29 +43,129 @@ Browser Support
 ```
 You can use [unpkg] to retrieve dist files.
 
-Implemented [Query Operators]
+### `#find(<Query>)`
+Search the `MapQL()` with the supplied query operators. The result is a `Cursor` with matching `Document` objects. Entries that have an `Object` as the value can be searched with `dot notation` fields.
+###### `Dot notation`
+```javascript
+#find({ '<Field>.<Field>.<Field>': { <Query Operators> } });
+```
+###### Example:
+```javascript
+// Cursor [ Document { _id: 'foo', value: { bar: { baz: 1 } } } ]
+{Instance}.find({ 'bar.baz': { $eq: 1 } });
+```
+### `#findAsync(<Query Operators>)`
+The `Promise` based version of `#find()`. More information to come.
+
+#### Cursor
+The `Cursor` class is an extended `Array` containing `Document` objects found with `find()`, providing `sort()` and `limit()` methods along with the rest of the [Array methods]. Please note that calling `limit()` _BEFORE_ `sort()` will limit the number of documents _BEFORE_ sorting and vise versa.
+
+##### `#sort(<Sort>)` -- Returns results ordered according to a sort specification.
+Specifies the order in which the query returns matching documents. Specify in the sort parameter the field or fields to sort by and a value of `1` or `-1` to specify an ascending or descending sort respectively.
+
+##### `#limit(<Limit>)` -- Constrains the size of a cursor's result set.
+Use the limit() method on a cursor to specify the maximum number of documents the cursor will return.
+
+#### Document
+The `Document` class is an extended `Object` containing the `MapQL()` entry within `Cursor`. The `Document` consits of an `_id` (entry `key`) and a `value` (entry `value`).
+```javascript
+// Cursor [ Document { _id: 'Foo', value: 'Bar' } ]
+{Instance}.set('Foo', 'Bar')
+```
+
+Implemented Query Operators
 -
-Used with `{Instance}.find(<Query>)` and `{Instance}.remove(<Query>[, <Multi (Boolean)>])`.
+###  Comparison
+##### $eq -- Matches values that are equal to a specified value.
+The `$eq` operator matches documents where the value of a field equals (`==`) the specified value. This is also the default `find()` operator.
+```
+<value> OR { <field>: { $eq: <value> } }
+```
+The following examples query against `MapQL` with the following documents:
+```javascript
+{Instance}.set('foo1', 'bar');
+{Instance}.set('foo2', { bar: 'baz' });
+{Instance}.set('bar', 'foo3');
+```
+The following example queries the `MapQL` instance to select all documents where the value equals `{ bar: 'baz' }` or `bar`. If a `Document` is added to the `Cursor` by it's key value, `Symbol(bykey)` will be true in the `Document`.
+```javascript
+// Cursor [ Document { _id: 'foo2', value: { bar: 'baz' } } ]
+{Instance}.find({ bar: { $eq: 'baz' } });
+// Cursor [ Document { _id: 'foo1', value: 'bar' } ]
+{Instance}.find({ $eq: 'bar' });
+/*
+Cursor [
+  Document { _id: 'bar', value: 'foo3', [Symbol(bykey)]: true },
+  Document { _id: 'foo1', value: 'bar', [Symbol(bykey)]: false },
+]
+*/
+{Instance}.find('bar');
+```
 
-* Comparison
-  * $eq, $gt, $gte, $lt, $lte, $ne, $in, $nin
-* Logical
-  * $or, $and
-* Element
-  * $exists, $type
-* Evaluation
-  * $regex, $where
-* Array
-  * $size
+##### $gt -- Matches values that are greater than a specified value.
+The `$gt` operator selects those documents where the value is greater than (`>`) the specified value.
 
-Implemented [Update Operators]
+##### $gte -- Matches values that are greater than or equal to a specified value.
+The `$gte` operator selects the documents where the value of the field is greater than or equal to (`>=`) the specified value.
+
+##### $lt -- Matches values that are less than a specified value.
+The `$lt` operator selects the documents where the value of the field is less than (`<`) the specified value.
+
+##### $lte -- Matches values that are less than or equal to a specified value.
+The `$lte` operator selects the documents where the value of the field is less than or equal to (`<=`) the specified value.
+
+##### $ne -- Matches all values that are not equal to a specified value.
+The `$ne` operator selects the documents where the value of the field is not equal (`!=`) to the specified value. This includes documents that do not contain the field.
+
+##### $in -- Matches any of the values specified in an array.
+The `$in` operator selects the documents where the value of a field equals any value in the specified `Array`.
+
+##### $nin -- Matches none of the values specified in an array.
+The `$nin` operator selects the documents where the field value is not in the specified `Array` or the field does not exist.
+
+#### Logical
+##### $or -- Joins query clauses with a logical OR returns all documents that match the conditions of either clause.
+The `$or` operator performs a logical OR operation on an `Array` of two or more `expressions` and selects the documents that satisfy at least one of the `expressions`.
+
+##### $and -- Joins query clauses with a logical AND returns all documents that match the conditions of both clauses.
+The `$and` operator performs a logical AND operation on an `Array` of two or more expressions (e.g. `expression1`, `expression2`, etc.) and selects the documents that satisfy all the expressions in the `Array`.
+
+#### Element
+##### $exists -- Matches documents that have the specified field.
+When `boolean` is `true`, `$exists` matches the documents that contain the field, including documents where the field value is `null`. If `boolean` is `false`, the query returns only the documents that do not contain the field.
+
+##### $type -- Selects documents if a field is of the specified type.
+The `$type` operator selects the documents where the value of the field is an instance of the specified data type. Querying by data type is useful when dealing with highly unstructured data where data types are not predictable.
+
+#### Evaluation
+##### $regex -- Selects documents where values match a specified regular expression.
+Provides regular expression capabilities for pattern matching strings in queries. `MapQL()` uses JavaScript regular expressions ([RegExp]).
+
+##### $where -- Matches documents that satisfy a JavaScript expression.
+Use the `$where` operator to pass a JavaScript function to the query system. The `$where` provides greater flexibility, but requires that the `MapQL()` processes the function for each document. Reference the document in the function using either `this` or as the first function `argument`.
+
+#### Array
+##### $size -- Selects documents if the array field is a specified size.
+The `$size` operator matches any `Array` with the number of elements specified by the argument.
+
+Implemented Update Operators
 -
-Used with `{Instance}.update(<Query>, <Update>)`.
+#### Fields
+##### $set -- Sets the value of a field in a document.
+The `$set` operator sets or replaces the value of a field with the specified value.
 
-* Fields
-  * $set, $inc, $mul, $unset
-* Array
-  * $pop
+##### $inc -- Increments the value of the field by the specified amount.
+The $inc operator increments a field by a specified value.
+
+##### $mul -- Multiplies the value of the field by the specified amount.
+Multiply the value of a field by a number.
+
+##### $unset -- Removes the specified field from a document.
+The $unset operator deletes a particular field.
+
+#### Array
+##### $pop -- Removes the first or last item of an array.
+The `$pop` operator removes the first or last element of an `Array`. Pass `$pop` a value of `-1` to remove the first element of an `Array` and `1` to remove the last element in an `Array`.
 
 Import/Export
 -
@@ -85,153 +185,12 @@ Current (known) supported [data types](/src/DataTypes.js):
 event that nether are available, import() will then attempt to convert it to a normal [Array] with Array.from(). Typed arrays are tested with [ArrayBuffer.isView()],
 this is an experimental (under tested) feature of MapQL. See [TypedArray] for more information about typed arrays.
 
-Example: `MapQL.find()`
--
-```javascript
-const MapQL = new (require('mapql'))(),
-    util = require('util'),
-    _print = (obj) => {
-        console.log('%s\n', util.inspect(obj, { depth: null, showHidden: true }));
-    };
-
-// Start out with some base data.
-MapQL.set('test0', 10);
-MapQL.set('test1', 'this is a string');
-MapQL.set('test2',{
-    foo: 7,
-    bar: 3,
-    baz: null,
-});
-MapQL.set('test11',{
-    foo: 7,
-    string: 'Look at me example all the things!'
-});
-MapQL.set('test12',{
-    foo: 7,
-    string: 'Another example string!',
-    baz: 'qux'
-});
-MapQL.set('test13',{
-    foo: 8,
-    baz: 'qux'
-});
-// Fill with junk.
-for (let num = 3; num < 10; num++) {
-    MapQL.set(`test${num}`, {
-       foo: Math.floor(Math.random()*15)+1,
-       bar: Math.floor(Math.random()*15)+1
-    });
-}
-
-// Sync!
-_print(MapQL.find({
-    foo: 8
-}));
-_print(MapQL.find({
-    foo: { '$gt': 6 },
-    bar: { '$lt': 10 }
-}));
-_print(MapQL.find({
-   '$gt': 3
-}));
-_print(MapQL.find({
-   '$eq': 'this is a string'
-}));
-_print(MapQL.find({
-   string: { '$regex': /Things!$/i }
-}));
-_print(MapQL.find({
-   '$regex': /String$/i
-}));
-_print(MapQL.find({
-  '$and': [{
-       foo: { '$eq': 7 },
-    }, {
-       '$or': [
-           { string: { '$regex': /Things!$/i } },
-           { string: { '$regex': /String!$/i } },
-       ]
-   }]
-}));
-
-// Promise!
-MapQL.findAsync({ foo: { '$gt': 2 }, bar: { '$lt': 10 } }).then((results) => {
-    _print(results);
- }).catch((error) => {
-    console.log(error);
-});
-```
-
-Example: `MapQL.chain()`
--
-```javascript
-const MapQL = new (require('mapql/chainable'))(),
-      util = require('util');
-7
-// Add some base data.
-MapQL.set('testing0', {
-   foo: 4,
-   bar: 11
-});
-MapQL.set('testing1', {
-   foo: 2,
-   bar: 9
-});
-MapQL.set('testing2', {
-   foo: 8,
-   bar: 3
-});
-MapQL.set('testing3', {
-   foo: 2,
-   bar: 100
-});
-
-// Generate a basic chained query.
-let $gt = MapQL.chain().gt('foo', 3);
-
-// Generate a somewhat complex query for $or.
-let $or = MapQL.chain().or((chain) => {
-    return [
-        chain.eq('foo', 4),
-        chain.eq('foo', 2)
-    ]
-});
-
-// Generate a more complex chained query for $and.
-let $and = MapQL.chain().and((chain) => {
-    return [
-        chain.lt('foo', 5),
-        chain.or(() => {
-            return [
-                chain.lt('bar', 10),
-                chain.eq('bar', 100)
-            ];
-        })
-    ];
-});
-
-// Execute $gt!
-console.log('$gt query:\n%s\n', util.inspect($gt.query, { depth: null }));
-console.log('$gt results:\n%s\n', util.inspect($gt.execute(), { depth: null }));
-
-// Execute $or!
-console.log('$or query:\n%s\n', util.inspect($or.query, { depth: null }));
-console.log('$or results:\n%s\n', util.inspect($or.execute(), { depth: null }));
-
-// Execute $and!
-console.log('$and query:\n%s\n', util.inspect($and.query, { depth: null }));
-console.log('$and results:\n%s\n', util.inspect($and.execute(), { depth: null }));
-
-// List all entries.
-console.log('entries:\n%s', util.inspect([...MapQL.entries()], { depth: null }));
-````
 
 [MongoDB]: https://www.mongodb.com/
 [ES6 Map()]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map
 [Classes]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes
+[RegExp]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp
 [Arrow]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions
-[Query Operators]: https://docs.mongodb.com/manual/reference/operator/query/
-[Update Operators]: https://docs.mongodb.com/manual/reference/operator/update/
 [unpkg]: https://unpkg.com/mapql/
 [karma]: http://karma-runner.github.io/
 [karma-sauce-launcher]: https://github.com/karma-runner/karma-sauce-launcher
@@ -241,7 +200,7 @@ console.log('entries:\n%s', util.inspect([...MapQL.entries()], { depth: null }))
 [Buffer]: https://nodejs.org/api/buffer.html
 [Uint8Array]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array
 [Array]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array
+[Array methods]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array#Methods
 [Array.from]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/from
 [ArrayBuffer.isView()]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer/isView
 [TypedArray]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray
-

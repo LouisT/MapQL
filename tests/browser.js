@@ -148,18 +148,18 @@ describe('Get', () => {
             assert.equal(MapQL1.find({ 'array': { '$size': 4 } })[0]._id, 'test11');
         });
     });
-    describe('#findAsync()', () => {
-        it('it should find test0 for findAsync({ \'$eq\': 10 }).then()', () => {
-            return MapQL1.findAsync({ '$eq': 10 });
+    describe('#findPromise()', () => {
+        it('it should find test0 for findPromise({ \'$eq\': 10 }).then()', () => {
+            return MapQL1.findPromise({ '$eq': 10 });
         });
-        it('it should find test2 for findAsync({ foo: { \'$eq\': \'bar\' } }).then()', () => {
-            return MapQL1.findAsync({ foo: { '$eq': 'bar' } });
+        it('it should find test2 for findPromise({ foo: { \'$eq\': \'bar\' } }).then()', () => {
+            return MapQL1.findPromise({ foo: { '$eq': 'bar' } });
         });
-        it('it should find test3 for findAsync({ \'$regex\': /^Str/i }).then()', () => {
-            return MapQL1.findAsync({ '$regex': /^Str/i });
+        it('it should find test3 for findPromise({ \'$regex\': /^Str/i }).then()', () => {
+            return MapQL1.findPromise({ '$regex': /^Str/i });
         });
-        it('it should find test4 for findAsync({ qux: { \'$type\': \'number\' } }).then()', () => {
-            return MapQL1.findAsync({ qux: { '$type': 'number' } });
+        it('it should find test4 for findPromise({ qux: { \'$type\': \'number\' } }).then()', () => {
+            return MapQL1.findPromise({ qux: { '$type': 'number' } });
         });
     });
     describe('#findByKey()', () => {
