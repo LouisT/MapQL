@@ -155,13 +155,13 @@ Implemented Update Operators
 The `$set` operator sets or replaces the value of a field with the specified value.
 
 ##### $inc -- Increments the value of the field by the specified amount.
-The $inc operator increments a field by a specified value.
+The `$inc` operator increments a field by a specified value.
 
 ##### $mul -- Multiplies the value of the field by the specified amount.
-Multiply the value of a field by a number.
+The `$mul` operator multiplies the value of a field by a number.
 
 ##### $unset -- Removes the specified field from a document.
-The $unset operator deletes a particular field.
+The `$unset` operator deletes a particular field.
 
 #### Array
 ##### $pop -- Removes the first or last item of an array.
